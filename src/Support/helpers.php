@@ -197,3 +197,49 @@ if (!function_exists('setting')) {
         return \App\Services\SettingsService::get($key, $default);
     }
 }
+
+if (!function_exists('ledger_label')) {
+    function ledger_label(string $type): string
+    {
+        return match ($type) {
+            'deposit_credit' => 'Deposit',
+            'withdrawal_hold' => 'Withdrawal requested',
+            'withdrawal_release' => 'Withdrawal released',
+            'withdrawal_paid' => 'Withdrawal paid',
+            'cashback_pending' => 'Cashback pending',
+            'cashback_release' => 'Cashback credited',
+            'cashback_reversal' => 'Cashback reversed',
+            'referral_credit' => 'Referral bonus',
+            'referral_reversal' => 'Referral reversed',
+            'welcome_bonus' => 'Welcome bonus',
+            'purchase_debit' => 'Purchase',
+            'admin_credit' => 'Admin credit',
+            'admin_debit' => 'Admin debit',
+            default => ucfirst(str_replace('_', ' ', $type)),
+        };
+    }
+}
+
+if (!function_exists('time_ago')) {
+    function time_ago(string $datetime): string
+    {
+        $diff = time() - strtotime($datetime);
+        if ($diff < 60) return 'just now';
+        if ($diff < 3600) return floor($diff / 60) . 'm ago';
+        if ($diff < 86400) return floor($diff / 3600) . 'h ago';
+        if ($diff < 2592000) return floor($diff / 86400) . 'd ago';
+        return date('M j, Y', strtotime($datetime));
+    }
+}
+
+if (!function_exists('status_badge_class')) {
+    function status_badge_class(string $status): string
+    {
+        return match ($status) {
+            'approved', 'completed', 'confirmed', 'paid', 'credited', 'active', 'released' => 'badge-emerald',
+            'pending', 'processing', 'tracking' => 'badge-amber',
+            'rejected', 'cancelled', 'reversed', 'suspended', 'banned' => 'badge-danger',
+            default => 'badge-muted',
+        };
+    }
+}

@@ -149,4 +149,26 @@ if ((int) $stmt->fetchColumn() === 0) {
     }
 }
 
+// Demo products, clearly marked - safe to delete from the admin panel at any time.
+$stmt = $pdo->prepare('SELECT COUNT(*) FROM products');
+$stmt->execute();
+if ((int) $stmt->fetchColumn() === 0) {
+    $amazonId = $pdo->query("SELECT id FROM marketplaces WHERE slug = 'amazon'")->fetchColumn();
+    $ebayId = $pdo->query("SELECT id FROM marketplaces WHERE slug = 'ebay'")->fetchColumn();
+    $electronicsId = $pdo->query("SELECT id FROM product_categories WHERE slug = 'electronics'")->fetchColumn();
+
+    $demoProducts = [
+        ['Wireless Noise-Cancelling Headphones (Demo)', 'wireless-noise-cancelling-headphones-demo', $amazonId, $electronicsId, 'https://www.amazon.com', 159.99, 129.99, 10, 1],
+        ['Smart Fitness Watch (Demo)', 'smart-fitness-watch-demo', $ebayId, $electronicsId, 'https://www.ebay.com', 89.99, 69.99, 8, 1],
+    ];
+    $ins = $pdo->prepare('INSERT INTO products
+        (name, slug, marketplace_id, category_id, external_url, affiliate_url, original_price, display_price,
+         cashback_type, cashback_value, is_featured, is_published, short_description)
+        VALUES (?,?,?,?,?,?,?,?,"percentage",?,1,1,?)');
+    foreach ($demoProducts as $p) {
+        [$name, $slug, $mkId, $catId, $url, $original, $display, $cashback, $featured] = $p;
+        $ins->execute([$name, $slug, $mkId, $catId, $url, $url, $original, $display, $cashback, 'Demo product seeded for local testing/preview - replace with real catalog data in the admin panel.']);
+    }
+}
+
 echo "Seeding complete.\n";
