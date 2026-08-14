@@ -1,0 +1,19 @@
+# Fallback for Hostinger setups where the subdomain document root could not
+# be changed to /public. Prefer setting the "earn" subdomain document root
+# to public_html/earn/public in hPanel instead of relying on this file -
+# see README.md "Hostinger Deployment" for instructions.
+
+Options -Indexes -MultiViews
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteCond %{REQUEST_URI} !^/public/
+    RewriteRule ^(.*)$ /public/$1 [L]
+</IfModule>
+
+# Block direct access to application internals if the document root
+# could not be changed.
+RewriteRule ^(src|bootstrap|routes|database|storage|tests|vendor)/ - [F,L]
+<FilesMatch "\.(env|log|sql|md|lock)$">
+    Require all denied
+</FilesMatch>
