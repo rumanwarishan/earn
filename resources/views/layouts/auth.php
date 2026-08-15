@@ -9,6 +9,7 @@
   <link rel="stylesheet" href="<?= asset('css/app.css') ?>">
 </head>
 <body class="auth-body" style="padding-bottom:40px;">
+  <div class="ambient-bg"></div>
   <div id="toast-stack"></div>
   <div class="auth-glow auth-glow-a"></div>
   <div class="auth-glow auth-glow-b"></div>
@@ -18,7 +19,7 @@
         <img class="brand-mark lg" src="/assets/img/logo-mark.svg" alt=""><?= e((string) setting('site_name', 'Billions Earn')) ?>
       </a>
     </div>
-    <div class="glass-card auth-card" style="padding:28px 24px;">
+    <div class="glass-card auth-card glow-ring" style="padding:28px 24px;">
       <?= view('partials.flash') ?>
       <?= $content ?>
     </div>

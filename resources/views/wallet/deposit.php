@@ -24,7 +24,7 @@
   <div class="mt-2">Your deposit is not confirmed until an admin approves it - never treat a broadcast transaction as credited funds.</div>
 </div>
 
-<form method="POST" action="/wallet/deposit" class="glass-card mb-3" style="padding:20px;">
+<form method="POST" action="/wallet/deposit" class="glass-card mb-3 glow-ring" style="padding:20px;">
   <?= csrf_field() ?>
   <div class="field">
     <label>BTC amount sent</label>

@@ -11,6 +11,7 @@
   <link rel="stylesheet" href="<?= asset('css/admin.css') ?>">
 </head>
 <body style="padding-bottom:0;">
+  <div class="ambient-bg"></div>
   <div id="toast-stack"></div>
   <div class="admin-shell">
     <aside class="admin-sidebar">

@@ -9,6 +9,7 @@
   <link rel="stylesheet" href="<?= asset('css/app.css') ?>">
 </head>
 <body>
+  <div class="ambient-bg"></div>
   <div id="toast-stack"></div>
   <?= view('partials.header', ['unreadCount' => $unreadCount ?? 0]) ?>
   <main class="container" style="padding-top:18px;">

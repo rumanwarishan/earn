@@ -1,6 +1,6 @@
 <h2 class="mb-3">Withdraw funds</h2>
 
-<div class="glass-card mb-3" style="padding:20px;">
+<div class="glass-card mb-3 glow-ring" style="padding:20px;">
   <div class="text-muted" style="font-size:12.5px;">Withdrawable balance</div>
   <div style="font-size:26px;font-weight:750;margin:4px 0;"><?= money($spendable) ?></div>
   <div class="text-muted" style="font-size:12px;">Minimum <?= money($minWithdrawal) ?> · Maximum <?= money($maxWithdrawal) ?></div>
@@ -9,7 +9,7 @@
 <?php if (bccomp($spendable, $minWithdrawal, 2) < 0): ?>
   <div class="alert alert-error">You need at least <?= money($minWithdrawal) ?> withdrawable balance to request a withdrawal. Your current balance is <?= money($spendable) ?>.</div>
 <?php else: ?>
-<form method="POST" action="/wallet/withdraw" class="glass-card mb-3" style="padding:20px;">
+<form method="POST" action="/wallet/withdraw" class="glass-card mb-3 glow-ring" style="padding:20px;">
   <?= csrf_field() ?>
   <div class="field">
     <label>Amount (USD)</label>

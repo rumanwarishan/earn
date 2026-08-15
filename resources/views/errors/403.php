@@ -2,6 +2,7 @@
 <html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Access denied</title><link rel="stylesheet" href="<?= asset('css/app.css') ?>"></head>
 <body style="display:flex;align-items:center;justify-content:center;min-height:100vh;">
+  <div class="ambient-bg"></div>
   <div class="glass-card text-center" style="padding:40px 32px;max-width:360px;">
     <h2>Access denied</h2>
     <p class="mt-2"><?= e($message ?? "You don't have permission to view this page.") ?></p>
