@@ -351,6 +351,19 @@ table.data-table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
 table.data-table th { text-align: left; padding: 12px 14px; color: var(--text-lo); font-weight: 600; font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.04em; border-bottom: 1px solid var(--surface-border); white-space: nowrap; }
 table.data-table td { padding: 12px 14px; border-bottom: 1px solid rgba(255,255,255,0.05); white-space: nowrap; }
 table.data-table tr:hover td { background: rgba(255,255,255,0.02); }
+/* Long titles/descriptions get truncated with an ellipsis (full text on hover)
+   instead of stretching the row and pushing the action buttons off-screen. */
+table.data-table td.cell-truncate {
+  max-width: 280px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+/* The actions column stays pinned to the right on horizontal scroll, so Edit/
+   Archive/etc. never require scrolling all the way across a wide row to reach. */
+table.data-table th:last-child, table.data-table td:last-child {
+  position: sticky; right: 0; background: #0d0d17; white-space: nowrap;
+  box-shadow: -10px 0 14px -10px rgba(0,0,0,0.55);
+}
+table.data-table th:last-child { background: #0a0a12; }
+table.data-table tr:hover td:last-child { background: #14141f; }
 
 /* ---------- Modal / bottom sheet ---------- */
 .modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); z-index: 90; display: flex; align-items: flex-end; justify-content: center; }

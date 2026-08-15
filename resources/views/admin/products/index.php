@@ -15,7 +15,7 @@
       <?php if (!$products): ?><tr><td colspan="7" class="text-muted">No products yet.</td></tr><?php endif; ?>
       <?php foreach ($products as $p): ?>
         <tr>
-          <td><?= e($p['name']) ?></td>
+          <td class="cell-truncate" title="<?= e($p['name']) ?>"><?= e($p['name']) ?></td>
           <td><?= e($p['marketplace_name']) ?></td>
           <td><?= money($p['display_price']) ?></td>
           <td><?= $p['cashback_type'] === 'percentage' ? rtrim(rtrim((string) $p['cashback_value'], '0'), '.') . '%' : money($p['cashback_value']) ?></td>

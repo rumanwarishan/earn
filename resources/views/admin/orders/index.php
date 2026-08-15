@@ -13,7 +13,7 @@
       <?php foreach ($orders as $o): ?>
         <tr>
           <td><?= e($o['full_name']) ?></td>
-          <td><?= e($o['product_name']) ?> <span class="text-muted">(<?= e($o['marketplace_name']) ?>)</span></td>
+          <td class="cell-truncate" title="<?= e($o['product_name']) ?> (<?= e($o['marketplace_name']) ?>)"><?= e($o['product_name']) ?> <span class="text-muted">(<?= e($o['marketplace_name']) ?>)</span></td>
           <td><?= money($o['product_price']) ?></td>
           <td><span class="badge <?= $o['payment_source'] === 'wallet' ? 'badge-cyan' : 'badge-muted' ?>"><?= $o['payment_source'] === 'wallet' ? '💳 Wallet' : 'Affiliate' ?></span></td>
           <td><?= money($o['cashback_amount']) ?> <span class="badge <?= status_badge_class($o['cashback_status']) ?>"><?= e($o['cashback_status']) ?></span></td>
