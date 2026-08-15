@@ -11,7 +11,7 @@
 
 <div class="glass-card mb-3">
   <a href="/wallet" class="flex items-center justify-between" style="padding:16px;border-bottom:1px solid rgba(255,255,255,0.05);"><span>💰 Wallet</span><span class="text-muted">›</span></a>
-  <a href="/orders" class="flex items-center justify-between" style="padding:16px;border-bottom:1px solid rgba(255,255,255,0.05);"><span>📦 Orders</span><span class="text-muted">›</span></a>
+  <a href="/tasks" class="flex items-center justify-between" style="padding:16px;border-bottom:1px solid rgba(255,255,255,0.05);"><span>📦 Tasks</span><span class="text-muted">›</span></a>
   <a href="/referral" class="flex items-center justify-between" style="padding:16px;border-bottom:1px solid rgba(255,255,255,0.05);"><span>🎁 Referrals</span><span class="text-muted">›</span></a>
   <a href="/notifications" class="flex items-center justify-between" style="padding:16px;"><span>🔔 Notifications</span><span class="text-muted">›</span></a>
 </div>

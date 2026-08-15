@@ -123,6 +123,52 @@ final class WalletService
     }
 
     /**
+     * Debit spendable balances in priority order (deposited, then cashback,
+     * then referral) for an immediate, final purchase - unlike a withdrawal
+     * hold, there is no reserved/release cycle since the funds don't need
+     * admin review before being spent. Returns the per-bucket breakdown.
+     */
+    public static function debitForPurchase(int $userId, string $amount, string $type, string $referenceType, int $referenceId, string $description, string $ip): array
+    {
+        return Database::transaction(function (PDO $pdo) use ($userId, $amount, $type, $referenceType, $referenceId, $description, $ip) {
+            $wallet = self::getOrCreateWallet($userId, $pdo, lock: true);
+
+            if ((bool) $wallet['is_frozen']) {
+                throw new RuntimeException('Wallet is frozen. Contact support.');
+            }
+
+            $remaining = $amount;
+            $breakdown = [];
+
+            foreach (['deposited', 'cashback', 'referral'] as $bucket) {
+                if (bccomp($remaining, '0', 2) <= 0) {
+                    break;
+                }
+                $available = $wallet[$bucket . '_balance'];
+                if (bccomp($available, '0', 2) <= 0) {
+                    continue;
+                }
+                $take = bccomp($available, $remaining, 2) < 0 ? $available : $remaining;
+
+                self::applyLedgerEntry(
+                    $userId, $bucket, bcmul($take, '-1', 2), $type,
+                    $referenceType, $referenceId, $description,
+                    'user', $userId, null, $ip
+                );
+
+                $breakdown[$bucket] = $take;
+                $remaining = bcsub($remaining, $take, 2);
+            }
+
+            if (bccomp($remaining, '0', 2) > 0) {
+                throw new InsufficientBalanceException('Insufficient wallet balance for this purchase.');
+            }
+
+            return $breakdown;
+        });
+    }
+
+    /**
      * Debit spendable balances in priority order (referral, then cashback, then
      * deposited) and move the total into the reserved balance for a pending
      * withdrawal. Returns the per-bucket breakdown for audit purposes.

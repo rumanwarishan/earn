@@ -48,7 +48,7 @@
 <div class="stat-grid mb-3">
   <div class="glass-panel stat-tile"><div class="label">Today's cashback</div><div class="value"><?= money($todayCashback) ?></div></div>
   <div class="glass-panel stat-tile"><div class="label">Total earned</div><div class="value"><?= money($wallet['total_earned']) ?></div></div>
-  <div class="glass-panel stat-tile"><div class="label">Total orders</div><div class="value"><?= (int) $totalOrders ?></div></div>
+  <div class="glass-panel stat-tile"><div class="label">Total tasks</div><div class="value"><?= (int) $totalOrders ?></div></div>
   <div class="glass-panel stat-tile"><div class="label">Direct referrals</div><div class="value"><?= (int) $directReferrals ?></div></div>
 </div>
 

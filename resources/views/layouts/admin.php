@@ -24,6 +24,7 @@
         <a class="<?= adminActive('/admin/wallets', $path) ?>" href="/admin/wallets">📒 Wallet Ledger</a>
         <a class="<?= adminActive('/admin/products', $path) ?>" href="/admin/products">🛍️ Products</a>
         <a class="<?= adminActive('/admin/orders', $path) ?>" href="/admin/orders">📦 Orders</a>
+        <a class="<?= adminActive('/admin/tasks', $path) ?>" href="/admin/tasks">✅ Tasks</a>
         <a class="<?= adminActive('/admin/membership-levels', $path) ?>" href="/admin/membership-levels">🏅 Membership</a>
         <a class="<?= adminActive('/admin/marketplaces', $path) ?>" href="/admin/marketplaces">🏬 Marketplaces</a>
         <a class="<?= adminActive('/admin/settings', $path) ?>" href="/admin/settings">⚙️ Settings</a>

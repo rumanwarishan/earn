@@ -66,6 +66,20 @@ if ((int) $stmt->fetchColumn() === 0) {
     }
 }
 
+// Default quests: a one-time welcome bonus for new users and a daily check-in.
+$stmt = $pdo->prepare('SELECT COUNT(*) FROM tasks');
+$stmt->execute();
+if ((int) $stmt->fetchColumn() === 0) {
+    $tasks = [
+        ['Welcome bonus', 'Claim your one-time welcome reward for joining Billions Earn.', 'welcome', 5.00, 1, 1],
+        ['Daily check-in', 'Come back and claim a small reward every day.', 'daily', 0.50, 1, 2],
+    ];
+    $ins = $pdo->prepare('INSERT INTO tasks (title, description, type, reward_amount, is_active, sort_order) VALUES (?,?,?,?,?,?)');
+    foreach ($tasks as $t) {
+        $ins->execute($t);
+    }
+}
+
 // RBAC roles.
 $stmt = $pdo->prepare('SELECT COUNT(*) FROM roles');
 $stmt->execute();
@@ -73,7 +87,7 @@ if ((int) $stmt->fetchColumn() === 0) {
     $roles = [
         ['Super Admin', 'super_admin', json_encode(['*'])],
         ['Finance Admin', 'finance_admin', json_encode(['deposits.*', 'withdrawals.*', 'wallets.*', 'ledger.view'])],
-        ['Product Admin', 'product_admin', json_encode(['products.*', 'categories.*', 'marketplaces.*', 'orders.*'])],
+        ['Product Admin', 'product_admin', json_encode(['products.*', 'categories.*', 'marketplaces.*', 'orders.*', 'tasks.*'])],
         ['Support Admin', 'support_admin', json_encode(['users.view', 'users.update', 'chatbot.*', 'faq.*'])],
         ['Content Admin', 'content_admin', json_encode(['pages.*', 'faq.*', 'notifications.templates'])],
     ];

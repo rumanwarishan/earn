@@ -98,17 +98,26 @@ final class AdminProductController
             'name', 'description', 'short_description', 'marketplace_id', 'category_id',
             'external_url', 'affiliate_url', 'original_price', 'display_price',
             'cashback_type', 'cashback_value', 'tags', 'is_featured', 'is_published',
+            'fulfillment_type', 'stock_quantity',
         ]);
 
         try {
             if (trim((string) $data['name']) === '') {
                 throw new ValidationException(['name' => 'Product name is required.']);
             }
-            if (!filter_var($data['external_url'], FILTER_VALIDATE_URL)) {
+            $fulfillmentType = in_array($data['fulfillment_type'], ['affiliate', 'dropship'], true) ? $data['fulfillment_type'] : 'affiliate';
+            if ($fulfillmentType === 'affiliate' && !filter_var($data['external_url'], FILTER_VALIDATE_URL)) {
                 throw new ValidationException(['external_url' => 'A valid external URL is required.']);
             }
             if (!preg_match('/^\d+(\.\d{1,2})?$/', (string) $data['display_price'])) {
                 throw new ValidationException(['display_price' => 'Enter a valid price.']);
+            }
+            $stockQuantity = null;
+            if ($data['stock_quantity'] !== null && trim((string) $data['stock_quantity']) !== '') {
+                if (!preg_match('/^\d+$/', (string) $data['stock_quantity'])) {
+                    throw new ValidationException(['stock_quantity' => 'Enter a valid whole number.']);
+                }
+                $stockQuantity = (int) $data['stock_quantity'];
             }
 
             $imagePath = null;
@@ -119,20 +128,22 @@ final class AdminProductController
 
             $isFeatured = isset($data['is_featured']) ? 1 : 0;
             $isPublished = isset($data['is_published']) ? 1 : 0;
+            $externalUrl = (string) ($data['external_url'] ?: '');
 
             if ($id === null) {
                 $slug = ProductService::uniqueSlug($data['name'], $pdo);
                 $stmt = $pdo->prepare('INSERT INTO products
                     (name, slug, description, short_description, image_path, marketplace_id, category_id,
                      external_url, affiliate_url, original_price, display_price, cashback_type, cashback_value,
-                     tags, is_featured, is_published)
-                    VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)');
+                     tags, is_featured, is_published, fulfillment_type, stock_quantity)
+                    VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)');
                 $stmt->execute([
                     $data['name'], $slug, $data['description'], $data['short_description'], $imagePath,
                     $data['marketplace_id'] ?: null, $data['category_id'] ?: null,
-                    $data['external_url'], $data['affiliate_url'] ?: $data['external_url'],
+                    $externalUrl, $data['affiliate_url'] ?: ($externalUrl ?: null),
                     $data['original_price'] ?: null, $data['display_price'], $data['cashback_type'] ?: 'percentage',
                     $data['cashback_value'] ?: 0, $data['tags'], $isFeatured, $isPublished,
+                    $fulfillmentType, $stockQuantity,
                 ]);
                 $newId = (int) $pdo->lastInsertId();
                 AuditLogger::log('admin', $admin['id'], 'product.created', 'product', $newId, null, $data, null, $request->ip());
@@ -142,13 +153,14 @@ final class AdminProductController
 
             $sql = 'UPDATE products SET name=?, description=?, short_description=?, marketplace_id=?, category_id=?,
                 external_url=?, affiliate_url=?, original_price=?, display_price=?, cashback_type=?, cashback_value=?,
-                tags=?, is_featured=?, is_published=?';
+                tags=?, is_featured=?, is_published=?, fulfillment_type=?, stock_quantity=?';
             $params = [
                 $data['name'], $data['description'], $data['short_description'],
                 $data['marketplace_id'] ?: null, $data['category_id'] ?: null,
-                $data['external_url'], $data['affiliate_url'] ?: $data['external_url'],
+                $externalUrl, $data['affiliate_url'] ?: ($externalUrl ?: null),
                 $data['original_price'] ?: null, $data['display_price'], $data['cashback_type'] ?: 'percentage',
                 $data['cashback_value'] ?: 0, $data['tags'], $isFeatured, $isPublished,
+                $fulfillmentType, $stockQuantity,
             ];
             if ($imagePath) {
                 $sql .= ', image_path = ?';

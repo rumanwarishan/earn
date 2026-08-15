@@ -8,6 +8,7 @@ use App\Core\Database;
 use App\Core\Request;
 use App\Core\Session;
 use App\Services\NotificationService;
+use App\Services\WalletService;
 
 final class ShopController
 {
@@ -100,12 +101,21 @@ final class ShopController
         }
 
         $user = Session::get('user');
+        $spendable = null;
+        if ($user) {
+            $wallet = WalletService::getOrCreateWallet((int) $user['id'], $pdo);
+            $spendable = WalletService::spendableBalance($wallet);
+        }
 
         echo view('layouts.app', [
             'pageTitle' => $product['name'],
             'robots' => 'index,follow',
             'unreadCount' => $user ? NotificationService::unreadCount((int) $user['id']) : 0,
-            'content' => view('shop.show', ['product' => $product]),
+            'content' => view('shop.show', [
+                'product' => $product,
+                'user' => $user,
+                'spendable' => $spendable,
+            ]),
         ]);
     }
 

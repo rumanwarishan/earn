@@ -87,7 +87,12 @@ final class OrderService
         });
     }
 
-    private static function creditCashbackLocked(PDO $pdo, array $order, int $adminId, string $ip): void
+    /**
+     * Public so PurchaseService (immediate-payment wallet purchases, no admin
+     * involved) can reuse the exact same crediting logic as admin-confirmed
+     * affiliate orders - one code path, one place that can double-credit.
+     */
+    public static function creditCashbackLocked(PDO $pdo, array $order, ?int $adminId, string $ip): void
     {
         if (bccomp($order['cashback_amount'], '0', 2) <= 0) {
             return;
@@ -101,7 +106,7 @@ final class OrderService
         WalletService::applyLedgerEntry(
             (int) $order['user_id'], 'cashback', $order['cashback_amount'], 'cashback_release',
             'order', (int) $order['id'], 'Cashback credited for confirmed order',
-            'admin', $adminId, null, $ip
+            $adminId ? 'admin' : 'system', $adminId, null, $ip
         );
 
         MembershipService::refresh((int) $order['user_id']);

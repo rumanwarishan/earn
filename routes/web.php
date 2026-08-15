@@ -8,7 +8,8 @@ use App\Controllers\ChatbotController;
 use App\Controllers\DashboardController;
 use App\Controllers\DepositController;
 use App\Controllers\NotificationController;
-use App\Controllers\OrderController;
+use App\Controllers\PurchaseController;
+use App\Controllers\TaskController;
 use App\Controllers\ProfileController;
 use App\Controllers\ReferralController;
 use App\Controllers\ShopController;
@@ -22,6 +23,7 @@ use App\Controllers\Admin\AdminMarketplaceController;
 use App\Controllers\Admin\AdminMembershipController;
 use App\Controllers\Admin\AdminOrderController;
 use App\Controllers\Admin\AdminProductController;
+use App\Controllers\Admin\AdminTaskController;
 use App\Controllers\Admin\AdminSettingsController;
 use App\Controllers\Admin\AdminUserController;
 use App\Controllers\Admin\AdminWalletController;
@@ -81,7 +83,11 @@ $router->group('', [SecurityHeaders::class, MaintenanceMode::class], function (R
         $router->get('/profile', [ProfileController::class, 'index']);
         $router->post('/profile/password', [ProfileController::class, 'updatePassword'], [VerifyCsrfToken::class]);
         $router->get('/notifications', [NotificationController::class, 'index']);
-        $router->get('/orders', [OrderController::class, 'index']);
+        $router->get('/tasks', [TaskController::class, 'index']);
+        $router->post('/tasks/{id}/claim', [TaskController::class, 'claim'], [VerifyCsrfToken::class]);
+        $router->get('/orders', function () { redirect('/tasks'); });
+
+        $router->post('/shop/{id}/buy', [PurchaseController::class, 'buy'], [VerifyCsrfToken::class]);
     });
 
     // ---- Admin panel ----
@@ -138,6 +144,14 @@ $router->group('', [SecurityHeaders::class, MaintenanceMode::class], function (R
 
             $router->get('/membership-levels', [AdminMembershipController::class, 'index']);
             $router->post('/membership-levels/{id}', [AdminMembershipController::class, 'update'], [VerifyCsrfToken::class]);
+
+            $router->get('/tasks', [AdminTaskController::class, 'index']);
+            $router->get('/tasks/new', [AdminTaskController::class, 'create']);
+            $router->post('/tasks', [AdminTaskController::class, 'store'], [VerifyCsrfToken::class]);
+            $router->get('/tasks/{id}/edit', [AdminTaskController::class, 'edit']);
+            $router->post('/tasks/{id}', [AdminTaskController::class, 'update'], [VerifyCsrfToken::class]);
+            $router->post('/tasks/{id}/toggle', [AdminTaskController::class, 'toggleActive'], [VerifyCsrfToken::class]);
+            $router->post('/tasks/{id}/delete', [AdminTaskController::class, 'destroy'], [VerifyCsrfToken::class]);
 
             $router->get('/marketplaces', [AdminMarketplaceController::class, 'index']);
             $router->post('/marketplaces', [AdminMarketplaceController::class, 'store'], [VerifyCsrfToken::class]);

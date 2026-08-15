@@ -8,8 +8,9 @@ use App\Core\Database;
 use App\Core\Request;
 use App\Core\Session;
 use App\Services\NotificationService;
+use App\Services\TaskService;
 
-final class OrderController
+final class TaskController
 {
     public function index(Request $request): void
     {
@@ -25,9 +26,27 @@ final class OrderController
         $orders = $stmt->fetchAll();
 
         echo view('layouts.app', [
-            'pageTitle' => 'Orders',
+            'pageTitle' => 'Tasks',
             'unreadCount' => NotificationService::unreadCount((int) $user['id']),
-            'content' => view('orders.index', ['orders' => $orders]),
+            'content' => view('tasks.index', [
+                'tasks' => TaskService::availableFor((int) $user['id']),
+                'orders' => $orders,
+            ]),
         ]);
+    }
+
+    public function claim(Request $request): void
+    {
+        $user = Session::get('user');
+        $taskId = (int) $request->param('id');
+
+        try {
+            $result = TaskService::claim((int) $user['id'], $taskId, $request->ip());
+            flash_success('Claimed ' . money($result['reward_amount']) . ' for "' . $result['title'] . '"!');
+        } catch (\Throwable $e) {
+            flash_errors(['task' => $e->getMessage()]);
+        }
+
+        redirect('/tasks');
     }
 }

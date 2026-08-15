@@ -27,8 +27,26 @@
     </div>
   </div>
 
-  <div class="field"><label>External product URL</label><input class="input" type="url" name="external_url" required value="<?= e($product['external_url'] ?? '') ?>"></div>
-  <div class="field"><label>Affiliate/tracking URL (optional)</label><input class="input" type="url" name="affiliate_url" value="<?= e($product['affiliate_url'] ?? '') ?>"></div>
+  <?php $fulfillmentType = $product['fulfillment_type'] ?? 'affiliate'; ?>
+  <div class="field">
+    <label>Fulfillment type</label>
+    <select class="input" name="fulfillment_type" id="fulfillment_type" onchange="document.getElementById('affiliate_fields').style.display = this.value === 'affiliate' ? '' : 'none'; document.getElementById('stock_field').style.display = this.value === 'dropship' ? '' : 'none';">
+      <option value="affiliate" <?= $fulfillmentType === 'affiliate' ? 'selected' : '' ?>>Affiliate link (redirect to external store)</option>
+      <option value="dropship" <?= $fulfillmentType === 'dropship' ? 'selected' : '' ?>>Dropship (customers buy with wallet balance)</option>
+    </select>
+    <div class="field-hint">Dropship products are paid instantly from the customer's wallet, and you fulfill/ship the order yourself from the admin panel.</div>
+  </div>
+
+  <div id="affiliate_fields" style="<?= $fulfillmentType === 'dropship' ? 'display:none;' : '' ?>">
+    <div class="field"><label>External product URL</label><input class="input" type="url" name="external_url" value="<?= e($product['external_url'] ?? '') ?>"></div>
+    <div class="field"><label>Affiliate/tracking URL (optional)</label><input class="input" type="url" name="affiliate_url" value="<?= e($product['affiliate_url'] ?? '') ?>"></div>
+  </div>
+
+  <div id="stock_field" class="field" style="<?= $fulfillmentType === 'dropship' ? '' : 'display:none;' ?>">
+    <label>Stock quantity (optional)</label>
+    <input class="input" type="text" name="stock_quantity" inputmode="numeric" pattern="\d*" value="<?= e((string) ($product['stock_quantity'] ?? '')) ?>">
+    <div class="field-hint">Leave blank for unlimited stock. Decrements by 1 on each wallet purchase.</div>
+  </div>
 
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
     <div class="field"><label>Original price</label><input class="input" type="text" name="original_price" value="<?= e((string) ($product['original_price'] ?? '')) ?>"></div>

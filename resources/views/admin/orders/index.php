@@ -7,14 +7,15 @@
 
 <div class="glass-card table-wrap">
   <table class="data-table">
-    <thead><tr><th>User</th><th>Product</th><th>Price</th><th>Cashback</th><th>Status</th><th>Date</th><th></th></tr></thead>
+    <thead><tr><th>User</th><th>Product</th><th>Price</th><th>Payment</th><th>Cashback</th><th>Status</th><th>Date</th><th></th></tr></thead>
     <tbody>
-      <?php if (!$orders): ?><tr><td colspan="7" class="text-muted">No orders found.</td></tr><?php endif; ?>
+      <?php if (!$orders): ?><tr><td colspan="8" class="text-muted">No orders found.</td></tr><?php endif; ?>
       <?php foreach ($orders as $o): ?>
         <tr>
           <td><?= e($o['full_name']) ?></td>
           <td><?= e($o['product_name']) ?> <span class="text-muted">(<?= e($o['marketplace_name']) ?>)</span></td>
           <td><?= money($o['product_price']) ?></td>
+          <td><span class="badge <?= $o['payment_source'] === 'wallet' ? 'badge-cyan' : 'badge-muted' ?>"><?= $o['payment_source'] === 'wallet' ? '💳 Wallet' : 'Affiliate' ?></span></td>
           <td><?= money($o['cashback_amount']) ?> <span class="badge <?= status_badge_class($o['cashback_status']) ?>"><?= e($o['cashback_status']) ?></span></td>
           <td><span class="badge <?= status_badge_class($o['status']) ?>"><?= e($o['status']) ?></span></td>
           <td><?= e(time_ago($o['created_at'])) ?></td>
