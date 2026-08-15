@@ -5,14 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Admin Login · Billions Earn</title>
   <meta name="robots" content="noindex">
-  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="icon" type="image/svg+xml" href="<?= public_asset('favicon.svg') ?>">
   <link rel="stylesheet" href="<?= asset('css/app.css') ?>">
 </head>
 <body style="display:flex;align-items:center;justify-content:center;min-height:100vh;padding-bottom:0;">
   <div class="ambient-bg"></div>
   <div id="toast-stack"></div>
   <div class="container" style="max-width:380px;">
-    <div class="text-center mb-3 flex items-center gap-2" style="justify-content:center;font-weight:700;font-size:19px;"><img class="brand-mark" src="/assets/img/logo-mark.svg" alt=""> Earn Admin</div>
+    <div class="text-center mb-3 flex items-center gap-2" style="justify-content:center;font-weight:700;font-size:19px;"><img class="brand-mark" src="<?= asset('img/logo-mark.svg') ?>" alt=""> Earn Admin</div>
     <div class="glass-card" style="padding:28px 24px;">
       <?= view('partials.flash') ?>
       <h2 class="mb-3">Admin sign in</h2>

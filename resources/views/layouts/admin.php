@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title><?= e($pageTitle ?? 'Admin') ?> · Billions Earn Admin</title>
   <meta name="robots" content="noindex">
-  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="icon" type="image/svg+xml" href="<?= public_asset('favicon.svg') ?>">
   <link rel="stylesheet" href="<?= asset('css/app.css') ?>">
   <link rel="stylesheet" href="<?= asset('css/admin.css') ?>">
 </head>
@@ -15,7 +15,7 @@
   <div id="toast-stack"></div>
   <div class="admin-shell">
     <aside class="admin-sidebar">
-      <a href="/admin/dashboard" class="brand" style="padding:18px 20px;"><img class="brand-mark" src="/assets/img/logo-mark.svg" alt="">Earn Admin</a>
+      <a href="/admin/dashboard" class="brand" style="padding:18px 20px;"><img class="brand-mark" src="<?= asset('img/logo-mark.svg') ?>" alt="">Earn Admin</a>
       <nav class="admin-nav">
         <a class="<?= adminActive('/admin/dashboard', $path) ?>" href="/admin/dashboard">📊 Dashboard</a>
         <a class="<?= adminActive('/admin/users', $path) ?>" href="/admin/users">👥 Users</a>

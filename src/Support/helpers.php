@@ -41,6 +41,18 @@ if (!function_exists('asset')) {
     }
 }
 
+if (!function_exists('public_asset')) {
+    // Same cache-busting as asset(), but for any file directly under public/
+    // (favicon.svg, robots.txt, etc.) rather than specifically public/assets/.
+    function public_asset(string $path): string
+    {
+        $path = ltrim($path, '/');
+        $fullPath = base_path('public/' . $path);
+        $version = is_file($fullPath) ? filemtime($fullPath) : time();
+        return '/' . $path . '?v=' . $version;
+    }
+}
+
 if (!function_exists('e')) {
     function e(?string $value): string
     {
