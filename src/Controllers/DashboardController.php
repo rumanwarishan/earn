@@ -8,6 +8,7 @@ use App\Core\Database;
 use App\Core\Request;
 use App\Core\Session;
 use App\Services\NotificationService;
+use App\Services\TaskService;
 use App\Services\WalletService;
 
 final class DashboardController
@@ -55,6 +56,11 @@ final class DashboardController
             $nextLevel = $stmt->fetch() ?: null;
         }
 
+        $dailyTasks = array_values(array_filter(
+            TaskService::availableFor((int) $user['id']),
+            fn (array $t): bool => $t['type'] === 'daily'
+        ));
+
         echo view('layouts.app', [
             'pageTitle' => 'Dashboard',
             'unreadCount' => NotificationService::unreadCount((int) $user['id']),
@@ -67,6 +73,7 @@ final class DashboardController
                 'recentActivity' => $recentActivity,
                 'featuredProducts' => $featuredProducts,
                 'nextLevel' => $nextLevel,
+                'dailyTasks' => $dailyTasks,
             ]),
         ]);
     }

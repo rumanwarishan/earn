@@ -36,6 +36,30 @@
   </div>
 </div>
 
+<?php if ($dailyTasks): ?>
+<div class="section-head"><h3>Daily task</h3><a href="/tasks">All tasks</a></div>
+<?php foreach ($dailyTasks as $task): ?>
+  <div class="glass-card glow-ring mb-3" style="padding:18px;">
+    <div class="flex items-center justify-between">
+      <div style="padding-right:12px;">
+        <div style="font-size:14px;font-weight:650;"><?= e($task['title']) ?></div>
+        <?php if ($task['description']): ?><div class="text-muted mt-1" style="font-size:12px;"><?= e($task['description']) ?></div><?php endif; ?>
+        <div class="mt-2" style="font-size:13px;color:var(--emerald);font-weight:700;">+<?= money($task['reward_amount']) ?> bonus</div>
+      </div>
+      <?php if ($task['is_claimable']): ?>
+        <form method="POST" action="/tasks/<?= (int) $task['id'] ?>/claim">
+          <?= csrf_field() ?>
+          <input type="hidden" name="return_to" value="/dashboard">
+          <button class="btn btn-primary btn-sm" type="submit">Claim</button>
+        </form>
+      <?php else: ?>
+        <span class="badge badge-emerald">Done today</span>
+      <?php endif; ?>
+    </div>
+  </div>
+<?php endforeach; ?>
+<?php endif; ?>
+
 <div class="stat-grid mb-3">
   <div class="glass-panel stat-tile"><div class="label">Available</div><div class="value"><?= money($spendable) ?></div></div>
   <div class="glass-panel stat-tile"><div class="label">Deposited</div><div class="value"><?= money($wallet['deposited_balance']) ?></div></div>

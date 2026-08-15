@@ -47,6 +47,7 @@ final class TaskController
             flash_errors(['task' => $e->getMessage()]);
         }
 
-        redirect('/tasks');
+        $returnTo = (string) $request->input('return_to', '/tasks');
+        redirect(str_starts_with($returnTo, '/') ? $returnTo : '/tasks');
     }
 }
