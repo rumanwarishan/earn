@@ -173,6 +173,14 @@ final class AuthService
     public static function requestPasswordReset(string $email, string $ip): void
     {
         $email = strtolower(trim($email));
+
+        // Same rate-limit bucket mechanism as login, keyed separately so it
+        // can't be used to enumerate or spam a target's inbox.
+        if (RateLimiter::tooManyLoginAttempts('reset:' . $email, $ip)) {
+            return;
+        }
+        RateLimiter::recordAttempt('reset:' . $email, $ip, false);
+
         $pdo = Database::connection();
         $stmt = $pdo->prepare('SELECT id, full_name FROM users WHERE email = ?');
         $stmt->execute([$email]);

@@ -16,6 +16,7 @@
   </main>
   <?= view('partials.bottom-nav') ?>
   <?= view('partials.chatbot') ?>
+  <script>window.CSRF_TOKEN = <?= json_encode(csrf_token()) ?>;</script>
   <script src="/assets/js/app.js" defer></script>
 </body>
 </html>

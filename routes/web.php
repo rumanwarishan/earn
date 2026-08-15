@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Core\Router;
 use App\Controllers\AuthController;
+use App\Controllers\ChatbotController;
 use App\Controllers\DashboardController;
 use App\Controllers\DepositController;
 use App\Controllers\NotificationController;
@@ -31,10 +32,11 @@ use App\Middleware\AuthMiddleware;
 use App\Middleware\GuestMiddleware;
 use App\Middleware\AdminAuthMiddleware;
 use App\Middleware\AdminGuestMiddleware;
+use App\Middleware\MaintenanceMode;
 
 $router = new Router();
 
-$router->group('', [SecurityHeaders::class], function (Router $router) {
+$router->group('', [SecurityHeaders::class, MaintenanceMode::class], function (Router $router) {
 
     // ---- Guest auth routes ----
     $router->group('', [GuestMiddleware::class], function (Router $router) {
@@ -56,6 +58,8 @@ $router->group('', [SecurityHeaders::class], function (Router $router) {
     $router->get('/', function () {
         redirect(\App\Core\Session::has('user') ? '/dashboard' : '/login');
     });
+
+    $router->post('/api/chatbot/message', [ChatbotController::class, 'message']);
 
     // ---- Public shop routes (browsable without login) ----
     $router->get('/shop', [ShopController::class, 'index']);
