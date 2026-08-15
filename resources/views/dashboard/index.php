@@ -17,10 +17,22 @@
   <div class="text-muted" style="font-size:12.5px;">Wallet balance</div>
   <div style="font-size:30px;font-weight:750;margin:4px 0 14px;"><?= money($spendable) ?></div>
   <div class="quick-actions">
-    <a class="quick-action" href="/wallet/deposit"><span class="qa-icon">💰</span>Deposit</a>
-    <a class="quick-action" href="/wallet/withdraw"><span class="qa-icon">🏦</span>Withdraw</a>
-    <a class="quick-action" href="/shop"><span class="qa-icon">🛍️</span>Shop</a>
-    <a class="quick-action" href="/referral"><span class="qa-icon">🎁</span>Invite</a>
+    <a class="quick-action" href="/wallet/deposit">
+      <span class="qa-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11"/><path d="M7 10l5 5 5-5"/><path d="M4 19h16"/></svg></span>
+      Deposit
+    </a>
+    <a class="quick-action" href="/wallet/withdraw">
+      <span class="qa-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20V9"/><path d="M7 14l5-5 5 5"/><path d="M4 5h16"/></svg></span>
+      Withdraw
+    </a>
+    <a class="quick-action" href="/shop">
+      <span class="qa-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8h12l-1.2 11.2a1 1 0 01-1 .8H8.2a1 1 0 01-1-.8L6 8z"/><path d="M9 8a3 3 0 016 0"/></svg></span>
+      Shop
+    </a>
+    <a class="quick-action" href="/referral">
+      <span class="qa-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 20c0-3.6 2.6-6 5.5-6s5.5 2.4 5.5 6"/><path d="M17.5 7.5v6M14.5 10.5h6"/></svg></span>
+      Invite
+    </a>
   </div>
 </div>
 
