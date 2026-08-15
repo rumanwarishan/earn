@@ -23,6 +23,15 @@ set_error_handler(function (int $severity, string $message, string $file, int $l
     if (!(error_reporting() & $severity)) {
         return false;
     }
+
+    // Deprecation notices (ours or a vendor library's) are informational, not
+    // bugs worth crashing a request over - log and suppress instead of
+    // throwing. Everything else (warnings, notices, etc.) still fails fast.
+    if ($severity === E_DEPRECATED || $severity === E_USER_DEPRECATED) {
+        \App\Core\Logger::warning("Deprecated: {$message}", ['file' => $file, 'line' => $line]);
+        return true;
+    }
+
     throw new ErrorException($message, 0, $severity, $file, $line);
 });
 

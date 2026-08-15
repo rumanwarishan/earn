@@ -4,9 +4,11 @@
   <div class="alert alert-error">Deposits are temporarily unavailable. Please check back soon.</div>
 <?php else: ?>
 
-<div class="glass-card text-center mb-3" style="padding:24px;">
-  <img src="<?= $qrDataUri ?>" alt="BTC deposit QR code" style="margin:0 auto 16px;border-radius:12px;">
-  <div class="glass-panel mono" style="padding:12px;word-break:break-all;font-size:13px;"><?= e($address) ?></div>
+<div class="glass-card text-center mb-3 glow-ring" style="padding:24px;">
+  <div class="qr-frame glow-ring">
+    <img src="<?= $qrDataUri ?>" alt="BTC deposit QR code">
+  </div>
+  <div class="glass-panel mono" style="padding:12px;word-break:break-all;font-size:13px;margin-top:16px;"><?= e($address) ?></div>
   <button class="btn btn-secondary mt-3" data-copy="<?= e($address) ?>" data-copy-label="BTC address">Copy address</button>
 </div>
 
