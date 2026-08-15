@@ -95,11 +95,14 @@ final class AuthService
             ->execute([$userId, $hash]);
 
         $link = app_url('/verify-email?token=' . $token . '&uid=' . $userId);
-        $body = "<p>Hi {$fullName},</p><p>Welcome to Billions Earn. Please confirm your email address to activate your account:</p>"
-            . "<p><a href=\"{$link}\" style=\"color:#3ecbff;\">Verify my email</a></p>"
-            . "<p>This link expires in 24 hours.</p>";
+        $siteName = e((string) setting('site_name', 'Billions Earn'));
+        $body = '<p>Hi ' . e($fullName) . ',</p>'
+            . "<p>Welcome to {$siteName}! Please confirm your email address to activate your account and claim your welcome bonus.</p>"
+            . MailService::button($link, 'Verify my email')
+            . '<p style="color:#8a8aa3;font-size:13px;">This link expires in 24 hours. If the button doesn\'t work, copy and paste this URL into your browser:<br>'
+            . '<span style="color:#5b7bff;word-break:break-all;">' . e($link) . '</span></p>';
 
-        MailService::send($email, $fullName, 'Verify your Billions Earn account', MailService::layout('Verify your email', $body));
+        MailService::send($email, $fullName, "Verify your {$siteName} account", MailService::layout('Verify your email', $body));
     }
 
     public static function verifyEmail(int $userId, string $token): bool
@@ -199,11 +202,13 @@ final class AuthService
             ->execute([$user['id'], $hash]);
 
         $link = app_url('/reset-password?token=' . $token . '&uid=' . $user['id']);
-        $body = "<p>Hi {$user['full_name']},</p><p>We received a request to reset your password. This link expires in 1 hour:</p>"
-            . "<p><a href=\"{$link}\" style=\"color:#3ecbff;\">Reset my password</a></p>"
-            . "<p>If you didn't request this, you can ignore this email - your password will not change.</p>";
+        $siteName = e((string) setting('site_name', 'Billions Earn'));
+        $body = '<p>Hi ' . e($user['full_name']) . ',</p>'
+            . '<p>We received a request to reset your password. This link expires in 1 hour.</p>'
+            . MailService::button($link, 'Reset my password')
+            . '<p style="color:#8a8aa3;font-size:13px;">If you didn\'t request this, you can safely ignore this email - your password will not change.</p>';
 
-        MailService::send($email, $user['full_name'], 'Reset your Billions Earn password', MailService::layout('Reset your password', $body));
+        MailService::send($email, $user['full_name'], "Reset your {$siteName} password", MailService::layout('Reset your password', $body));
 
         AuditLogger::log('user', (int) $user['id'], 'password_reset.requested', 'user', (int) $user['id'], null, null, null, $ip);
     }

@@ -34,13 +34,28 @@ html, body {
 }
 
 body {
+  position: relative;
   min-height: 100vh;
-  background:
-    radial-gradient(900px 500px at 15% -10%, rgba(91, 123, 255, 0.16), transparent 60%),
-    radial-gradient(700px 500px at 100% 0%, rgba(155, 107, 255, 0.12), transparent 55%),
-    radial-gradient(800px 600px at 50% 110%, rgba(47, 224, 166, 0.08), transparent 60%),
-    var(--bg-0);
+  background: var(--bg-0);
   padding-bottom: 88px;
+  overflow-x: hidden;
+}
+
+/* Ambient RGB lighting - fixed so it stays put while content scrolls, soft
+   and layered rather than a single harsh glow. Kept behind everything via
+   negative z-index on a full-viewport pseudo-element. */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(1000px 620px at 8% -12%, rgba(62, 203, 255, 0.30), transparent 60%),
+    radial-gradient(900px 680px at 106% -4%, rgba(155, 107, 255, 0.28), transparent 58%),
+    radial-gradient(700px 560px at 88% 58%, rgba(255, 107, 214, 0.16), transparent 55%),
+    radial-gradient(900px 700px at 50% 118%, rgba(47, 224, 166, 0.22), transparent 60%),
+    var(--bg-0);
 }
 
 a { color: inherit; text-decoration: none; }
@@ -67,6 +82,23 @@ img { max-width: 100%; display: block; }
   border-radius: var(--radius-md);
 }
 
+/* ---------- Auth page extra glow ---------- */
+.auth-glow {
+  position: fixed;
+  border-radius: 50%;
+  filter: blur(60px);
+  pointer-events: none;
+  z-index: 0;
+}
+.auth-glow-a { width: 380px; height: 380px; top: -120px; left: -100px; background: radial-gradient(circle, rgba(62,203,255,0.35), transparent 70%); }
+.auth-glow-b { width: 420px; height: 420px; bottom: -160px; right: -120px; background: radial-gradient(circle, rgba(155,107,255,0.32), transparent 70%); }
+.auth-card {
+  position: relative;
+  z-index: 1;
+  border-image: linear-gradient(135deg, rgba(62,203,255,0.4), rgba(155,107,255,0.25), rgba(255,107,214,0.15)) 1;
+  box-shadow: 0 0 0 1px rgba(62,203,255,0.08), 0 20px 60px rgba(0,0,0,0.45), var(--shadow-glow);
+}
+
 /* ---------- Header ---------- */
 .app-header {
   position: sticky;
@@ -89,9 +121,11 @@ img { max-width: 100%; display: block; }
 .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 17px; }
 .brand-mark {
   width: 32px; height: 32px; border-radius: 10px;
-  background: linear-gradient(135deg, var(--cyan), var(--violet));
-  box-shadow: 0 0 18px rgba(62, 203, 255, 0.35);
+  display: block; flex-shrink: 0;
+  filter: drop-shadow(0 0 12px rgba(62, 203, 255, 0.45));
 }
+.brand-mark.lg { width: 56px; height: 56px; border-radius: 16px; }
+.brand-mark.sm { width: 26px; height: 26px; border-radius: 8px; }
 .icon-btn {
   width: 38px; height: 38px; border-radius: 12px;
   display: flex; align-items: center; justify-content: center;
@@ -279,8 +313,32 @@ table.data-table tr:hover td { background: rgba(255,255,255,0.02); }
 .chat-input-row { display: flex; gap: 8px; padding: 12px; border-top: 1px solid var(--surface-border); }
 .chat-input-row input { flex: 1; }
 
+/* ---------- Desktop nav (hidden on mobile, shown via media query below) ---------- */
+.desktop-nav { display: none; }
+
 @media (min-width: 900px) {
   body { padding-bottom: 0; }
   .bottom-nav { display: none; }
-  .container { max-width: 480px; }
+  .chat-fab, .chat-window { bottom: 24px; }
+
+  .container { max-width: 900px; padding: 0 24px; }
+  .app-header-inner { max-width: 1180px; padding: 14px 32px; }
+
+  .desktop-nav { display: flex; align-items: center; gap: 4px; margin-left: 12px; }
+  .desktop-nav a {
+    padding: 9px 14px; border-radius: 10px; font-size: 13.5px; font-weight: 600; color: var(--text-mid);
+    display: flex; align-items: center; gap: 7px;
+  }
+  .desktop-nav a svg { width: 17px; height: 17px; }
+  .desktop-nav a:hover { background: var(--surface-1); color: var(--text-hi); }
+  .desktop-nav a.active { background: linear-gradient(135deg, rgba(62,203,255,0.14), rgba(155,107,255,0.14)); color: var(--cyan); }
+
+  .stat-grid { grid-template-columns: repeat(4, 1fr); }
+  .quick-actions { max-width: 560px; }
+  .product-grid { grid-template-columns: repeat(3, 1fr); }
+}
+
+@media (min-width: 1240px) {
+  .container { max-width: 1080px; }
+  .product-grid { grid-template-columns: repeat(4, 1fr); }
 }

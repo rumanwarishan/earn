@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title><?= e($pageTitle ?? (string) setting('site_name', 'Billions Earn')) ?></title>
   <meta name="robots" content="<?= $robots ?? 'noindex' ?>">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
   <link rel="stylesheet" href="/assets/css/app.css">
 </head>
 <body>
