@@ -20,4 +20,4 @@
     <button class="btn btn-primary btn-sm" id="chatSend">Send</button>
   </div>
 </div>
-<script src="/assets/js/chatbot.js" defer></script>
+<script src="<?= asset('js/chatbot.js') ?>" defer></script>

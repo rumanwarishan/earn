@@ -6,7 +6,7 @@
   <title>Admin Login · Billions Earn</title>
   <meta name="robots" content="noindex">
   <link rel="icon" type="image/svg+xml" href="/favicon.svg">
-  <link rel="stylesheet" href="/assets/css/app.css">
+  <link rel="stylesheet" href="<?= asset('css/app.css') ?>">
 </head>
 <body style="display:flex;align-items:center;justify-content:center;min-height:100vh;padding-bottom:0;">
   <div id="toast-stack"></div>

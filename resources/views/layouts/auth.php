@@ -6,7 +6,7 @@
   <title><?= e($pageTitle ?? (string) setting('site_name', 'Billions Earn')) ?></title>
   <meta name="robots" content="noindex">
   <link rel="icon" type="image/svg+xml" href="/favicon.svg">
-  <link rel="stylesheet" href="/assets/css/app.css">
+  <link rel="stylesheet" href="<?= asset('css/app.css') ?>">
 </head>
 <body class="auth-body" style="padding-bottom:40px;">
   <div id="toast-stack"></div>
@@ -23,6 +23,6 @@
       <?= $content ?>
     </div>
   </div>
-  <script src="/assets/js/app.js" defer></script>
+  <script src="<?= asset('js/app.js') ?>" defer></script>
 </body>
 </html>

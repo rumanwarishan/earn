@@ -6,7 +6,7 @@
   <title><?= e($pageTitle ?? (string) setting('site_name', 'Billions Earn')) ?></title>
   <meta name="robots" content="<?= $robots ?? 'noindex' ?>">
   <link rel="icon" type="image/svg+xml" href="/favicon.svg">
-  <link rel="stylesheet" href="/assets/css/app.css">
+  <link rel="stylesheet" href="<?= asset('css/app.css') ?>">
 </head>
 <body>
   <div id="toast-stack"></div>
@@ -18,6 +18,6 @@
   <?= view('partials.bottom-nav') ?>
   <?= view('partials.chatbot') ?>
   <script>window.CSRF_TOKEN = <?= json_encode(csrf_token()) ?>;</script>
-  <script src="/assets/js/app.js" defer></script>
+  <script src="<?= asset('js/app.js') ?>" defer></script>
 </body>
 </html>

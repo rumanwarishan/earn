@@ -7,8 +7,8 @@
   <title><?= e($pageTitle ?? 'Admin') ?> · Billions Earn Admin</title>
   <meta name="robots" content="noindex">
   <link rel="icon" type="image/svg+xml" href="/favicon.svg">
-  <link rel="stylesheet" href="/assets/css/app.css">
-  <link rel="stylesheet" href="/assets/css/admin.css">
+  <link rel="stylesheet" href="<?= asset('css/app.css') ?>">
+  <link rel="stylesheet" href="<?= asset('css/admin.css') ?>">
 </head>
 <body style="padding-bottom:0;">
   <div id="toast-stack"></div>
@@ -43,6 +43,6 @@
       </main>
     </div>
   </div>
-  <script src="/assets/js/app.js" defer></script>
+  <script src="<?= asset('js/app.js') ?>" defer></script>
 </body>
 </html>

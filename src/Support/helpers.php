@@ -34,7 +34,10 @@ if (!function_exists('app_url')) {
 if (!function_exists('asset')) {
     function asset(string $path): string
     {
-        return '/assets/' . ltrim($path, '/');
+        $path = ltrim($path, '/');
+        $fullPath = base_path('public/assets/' . $path);
+        $version = is_file($fullPath) ? filemtime($fullPath) : time();
+        return '/assets/' . $path . '?v=' . $version;
     }
 }
 
