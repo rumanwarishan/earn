@@ -40,7 +40,15 @@ final class FileUploadService
         // survive as anything other than pixel data, and never trust the client filename.
         $extension = self::ALLOWED_MIME[$mime];
         $filename = bin2hex(random_bytes(16)) . '.' . $extension;
-        $destination = base_path('public/uploads/products/' . $filename);
+        $uploadDir = base_path('public/uploads/products');
+        $destination = $uploadDir . '/' . $filename;
+
+        if (!is_dir($uploadDir)) {
+            mkdir($uploadDir, 0755, true);
+        }
+        if (!is_writable($uploadDir)) {
+            throw new ValidationException(['image' => 'The server cannot write to the uploads folder. Ask your host to fix the folder permissions on public/uploads/products.']);
+        }
 
         $image = match ($mime) {
             'image/jpeg' => imagecreatefromjpeg($file['tmp_name']),
@@ -53,13 +61,17 @@ final class FileUploadService
             throw new ValidationException(['image' => 'Could not process this image.']);
         }
 
-        match ($extension) {
+        $written = match ($extension) {
             'jpg' => imagejpeg($image, $destination, 88),
             'png' => imagepng($image, $destination, 6),
             'webp' => imagewebp($image, $destination, 88),
             'gif' => imagegif($image, $destination),
         };
         imagedestroy($image);
+
+        if (!$written || !is_file($destination)) {
+            throw new ValidationException(['image' => 'Failed to save the uploaded image. Please try again.']);
+        }
 
         return '/uploads/products/' . $filename;
     }
