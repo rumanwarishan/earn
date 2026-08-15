@@ -56,7 +56,12 @@ final class Request
 
     public function only(array $keys): array
     {
-        return array_intersect_key($this->all(), array_flip($keys));
+        $all = $this->all();
+        $result = [];
+        foreach ($keys as $key) {
+            $result[$key] = $all[$key] ?? null;
+        }
+        return $result;
     }
 
     public function query(string $key, mixed $default = null): mixed

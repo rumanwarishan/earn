@@ -13,10 +13,24 @@ use App\Controllers\ReferralController;
 use App\Controllers\ShopController;
 use App\Controllers\WalletController;
 use App\Controllers\WithdrawalController;
+use App\Controllers\Admin\AdminAuditController;
+use App\Controllers\Admin\AdminAuthController;
+use App\Controllers\Admin\AdminDashboardController;
+use App\Controllers\Admin\AdminDepositController;
+use App\Controllers\Admin\AdminMarketplaceController;
+use App\Controllers\Admin\AdminMembershipController;
+use App\Controllers\Admin\AdminOrderController;
+use App\Controllers\Admin\AdminProductController;
+use App\Controllers\Admin\AdminSettingsController;
+use App\Controllers\Admin\AdminUserController;
+use App\Controllers\Admin\AdminWalletController;
+use App\Controllers\Admin\AdminWithdrawalController;
 use App\Middleware\SecurityHeaders;
 use App\Middleware\VerifyCsrfToken;
 use App\Middleware\AuthMiddleware;
 use App\Middleware\GuestMiddleware;
+use App\Middleware\AdminAuthMiddleware;
+use App\Middleware\AdminGuestMiddleware;
 
 $router = new Router();
 
@@ -64,6 +78,75 @@ $router->group('', [SecurityHeaders::class], function (Router $router) {
         $router->post('/profile/password', [ProfileController::class, 'updatePassword'], [VerifyCsrfToken::class]);
         $router->get('/notifications', [NotificationController::class, 'index']);
         $router->get('/orders', [OrderController::class, 'index']);
+    });
+
+    // ---- Admin panel ----
+    $router->group('/admin', [], function (Router $router) {
+        $router->group('', [AdminGuestMiddleware::class], function (Router $router) {
+            $router->get('/login', [AdminAuthController::class, 'showLogin']);
+            $router->post('/login', [AdminAuthController::class, 'login'], [VerifyCsrfToken::class]);
+        });
+
+        $router->group('', [AdminAuthMiddleware::class], function (Router $router) {
+            $router->post('/logout', [AdminAuthController::class, 'logout'], [VerifyCsrfToken::class]);
+            $router->get('/dashboard', [AdminDashboardController::class, 'index']);
+
+            $router->get('/users', [AdminUserController::class, 'index']);
+            $router->get('/users/{id}', [AdminUserController::class, 'show']);
+            $router->post('/users/{id}/status', [AdminUserController::class, 'toggleStatus'], [VerifyCsrfToken::class]);
+
+            $router->get('/deposits', [AdminDepositController::class, 'index']);
+            $router->get('/deposits/{id}', [AdminDepositController::class, 'show']);
+            $router->post('/deposits/{id}/approve', [AdminDepositController::class, 'approve'], [VerifyCsrfToken::class]);
+            $router->post('/deposits/{id}/reject', [AdminDepositController::class, 'reject'], [VerifyCsrfToken::class]);
+
+            $router->get('/withdrawals', [AdminWithdrawalController::class, 'index']);
+            $router->get('/withdrawals/{id}', [AdminWithdrawalController::class, 'show']);
+            $router->post('/withdrawals/{id}/approve', [AdminWithdrawalController::class, 'approve'], [VerifyCsrfToken::class]);
+            $router->post('/withdrawals/{id}/reject', [AdminWithdrawalController::class, 'reject'], [VerifyCsrfToken::class]);
+            $router->post('/withdrawals/{id}/processing', [AdminWithdrawalController::class, 'processing'], [VerifyCsrfToken::class]);
+            $router->post('/withdrawals/{id}/paid', [AdminWithdrawalController::class, 'paid'], [VerifyCsrfToken::class]);
+            $router->post('/withdrawals/{id}/completed', [AdminWithdrawalController::class, 'completed'], [VerifyCsrfToken::class]);
+
+            $router->get('/wallets', [AdminWalletController::class, 'index']);
+            $router->get('/wallets/{id}', [AdminWalletController::class, 'userWallet']);
+            $router->post('/wallets/{id}/adjust', [AdminWalletController::class, 'adjust'], [VerifyCsrfToken::class]);
+            $router->post('/wallets/{id}/toggle-freeze', [AdminWalletController::class, 'toggleFreeze'], [VerifyCsrfToken::class]);
+
+            $router->get('/products', [AdminProductController::class, 'index']);
+            $router->get('/products/new', [AdminProductController::class, 'create']);
+            $router->post('/products', [AdminProductController::class, 'store'], [VerifyCsrfToken::class]);
+            $router->get('/products/import', [AdminProductController::class, 'importShow']);
+            $router->post('/products/import/preview', [AdminProductController::class, 'importPreview'], [VerifyCsrfToken::class]);
+            $router->post('/products/import/confirm', [AdminProductController::class, 'importConfirm'], [VerifyCsrfToken::class]);
+            $router->get('/products/export', [AdminProductController::class, 'exportCsv']);
+            $router->get('/products/{id}/edit', [AdminProductController::class, 'edit']);
+            $router->post('/products/{id}', [AdminProductController::class, 'update'], [VerifyCsrfToken::class]);
+            $router->post('/products/{id}/archive', [AdminProductController::class, 'archive'], [VerifyCsrfToken::class]);
+            $router->post('/products/{id}/duplicate', [AdminProductController::class, 'duplicate'], [VerifyCsrfToken::class]);
+
+            $router->get('/orders', [AdminOrderController::class, 'index']);
+            $router->get('/orders/new', [AdminOrderController::class, 'create']);
+            $router->post('/orders', [AdminOrderController::class, 'store'], [VerifyCsrfToken::class]);
+            $router->get('/orders/{id}', [AdminOrderController::class, 'show']);
+            $router->post('/orders/{id}/status', [AdminOrderController::class, 'updateStatus'], [VerifyCsrfToken::class]);
+            $router->post('/orders/{id}/reverse-cashback', [AdminOrderController::class, 'reverseCashback'], [VerifyCsrfToken::class]);
+
+            $router->get('/membership-levels', [AdminMembershipController::class, 'index']);
+            $router->post('/membership-levels/{id}', [AdminMembershipController::class, 'update'], [VerifyCsrfToken::class]);
+
+            $router->get('/marketplaces', [AdminMarketplaceController::class, 'index']);
+            $router->post('/marketplaces', [AdminMarketplaceController::class, 'store'], [VerifyCsrfToken::class]);
+            $router->post('/marketplaces/categories', [AdminMarketplaceController::class, 'storeCategory'], [VerifyCsrfToken::class]);
+            $router->post('/marketplaces/{id}/toggle', [AdminMarketplaceController::class, 'toggleActive'], [VerifyCsrfToken::class]);
+
+            $router->get('/settings', [AdminSettingsController::class, 'index']);
+            $router->post('/settings', [AdminSettingsController::class, 'update'], [VerifyCsrfToken::class]);
+            $router->post('/settings/referral-levels', [AdminSettingsController::class, 'addReferralLevel'], [VerifyCsrfToken::class]);
+            $router->post('/settings/referral-levels/{id}', [AdminSettingsController::class, 'updateReferralLevel'], [VerifyCsrfToken::class]);
+
+            $router->get('/audit-logs', [AdminAuditController::class, 'index']);
+        });
     });
 });
 

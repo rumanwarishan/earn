@@ -232,6 +232,22 @@ if (!function_exists('time_ago')) {
     }
 }
 
+if (!function_exists('admin_can')) {
+    function admin_can(string $permission): bool
+    {
+        return \App\Services\AdminAuthService::can($permission);
+    }
+}
+
+if (!function_exists('require_admin_permission')) {
+    function require_admin_permission(string $permission): void
+    {
+        if (!admin_can($permission)) {
+            abort(403, "You don't have permission to perform this action.");
+        }
+    }
+}
+
 if (!function_exists('status_badge_class')) {
     function status_badge_class(string $status): string
     {
