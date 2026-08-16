@@ -9,6 +9,8 @@ storage/framework/*
 !storage/framework/.gitkeep
 public/uploads/products/*
 !public/uploads/products/.gitkeep
+public/uploads/ads/*
+!public/uploads/ads/.gitkeep
 .DS_Store
 *.swp
 .phpunit.result.cache

@@ -80,7 +80,7 @@ final class WalletService
             $update = "UPDATE wallets SET {$column} = ?";
             $params = [$resulting];
 
-            if (bccomp($amount, '0', 2) > 0 && in_array($type, ['cashback_release', 'referral_credit', 'welcome_bonus'], true)) {
+            if (bccomp($amount, '0', 2) > 0 && in_array($type, ['cashback_release', 'referral_credit', 'welcome_bonus', 'task_reward', 'ad_reward'], true)) {
                 $update .= ', total_earned = total_earned + ?';
                 $params[] = $amount;
             }

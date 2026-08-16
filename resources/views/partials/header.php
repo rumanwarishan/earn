@@ -13,6 +13,8 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="3"/><path d="M5 21c0-4 3-6 7-6s7 2 7 6"/></svg>Rewards</a>
       <a class="<?= __navActive('/tasks', $__path) ?>" href="/tasks">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="7" width="16" height="13" rx="2"/><path d="M8 7V5a4 4 0 018 0v2"/></svg>Tasks</a>
+      <a class="<?= __navActive('/watch-and-earn', $__path) ?>" href="/watch-and-earn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2.5" y="5" width="19" height="13" rx="2.5"/><path d="M10 9.5l4.5 2.5-4.5 2.5v-5z" fill="currentColor" stroke="none"/></svg>Watch &amp; Earn</a>
     </nav>
     <div class="flex gap-2" style="margin-left:auto;">
       <a href="/notifications" class="icon-btn" aria-label="Notifications">

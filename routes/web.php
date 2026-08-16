@@ -14,7 +14,9 @@ use App\Controllers\ProfileController;
 use App\Controllers\ReferralController;
 use App\Controllers\ShopController;
 use App\Controllers\WalletController;
+use App\Controllers\WatchEarnController;
 use App\Controllers\WithdrawalController;
+use App\Controllers\Admin\AdminAdController;
 use App\Controllers\Admin\AdminAuditController;
 use App\Controllers\Admin\AdminAuthController;
 use App\Controllers\Admin\AdminDashboardController;
@@ -87,6 +89,10 @@ $router->group('', [SecurityHeaders::class, MaintenanceMode::class], function (R
         $router->post('/tasks/{id}/claim', [TaskController::class, 'claim'], [VerifyCsrfToken::class]);
         $router->get('/orders', function () { redirect('/tasks'); });
 
+        $router->get('/watch-and-earn', [WatchEarnController::class, 'index']);
+        $router->post('/watch-and-earn/{id}/start', [WatchEarnController::class, 'start'], [VerifyCsrfToken::class]);
+        $router->post('/watch-and-earn/session/{uuid}/complete', [WatchEarnController::class, 'complete'], [VerifyCsrfToken::class]);
+
         $router->post('/shop/{id}/buy', [PurchaseController::class, 'buy'], [VerifyCsrfToken::class]);
     });
 
@@ -152,6 +158,14 @@ $router->group('', [SecurityHeaders::class, MaintenanceMode::class], function (R
             $router->post('/tasks/{id}', [AdminTaskController::class, 'update'], [VerifyCsrfToken::class]);
             $router->post('/tasks/{id}/toggle', [AdminTaskController::class, 'toggleActive'], [VerifyCsrfToken::class]);
             $router->post('/tasks/{id}/delete', [AdminTaskController::class, 'destroy'], [VerifyCsrfToken::class]);
+
+            $router->get('/ads', [AdminAdController::class, 'index']);
+            $router->get('/ads/new', [AdminAdController::class, 'create']);
+            $router->post('/ads', [AdminAdController::class, 'store'], [VerifyCsrfToken::class]);
+            $router->get('/ads/{id}/edit', [AdminAdController::class, 'edit']);
+            $router->post('/ads/{id}', [AdminAdController::class, 'update'], [VerifyCsrfToken::class]);
+            $router->post('/ads/{id}/toggle', [AdminAdController::class, 'toggleActive'], [VerifyCsrfToken::class]);
+            $router->post('/ads/{id}/delete', [AdminAdController::class, 'destroy'], [VerifyCsrfToken::class]);
 
             $router->get('/marketplaces', [AdminMarketplaceController::class, 'index']);
             $router->post('/marketplaces', [AdminMarketplaceController::class, 'store'], [VerifyCsrfToken::class]);

@@ -87,7 +87,7 @@ if ((int) $stmt->fetchColumn() === 0) {
     $roles = [
         ['Super Admin', 'super_admin', json_encode(['*'])],
         ['Finance Admin', 'finance_admin', json_encode(['deposits.*', 'withdrawals.*', 'wallets.*', 'ledger.view'])],
-        ['Product Admin', 'product_admin', json_encode(['products.*', 'categories.*', 'marketplaces.*', 'orders.*', 'tasks.*'])],
+        ['Product Admin', 'product_admin', json_encode(['products.*', 'categories.*', 'marketplaces.*', 'orders.*', 'tasks.*', 'ads.*'])],
         ['Support Admin', 'support_admin', json_encode(['users.view', 'users.update', 'chatbot.*', 'faq.*'])],
         ['Content Admin', 'content_admin', json_encode(['pages.*', 'faq.*', 'notifications.templates'])],
     ];

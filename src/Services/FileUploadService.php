@@ -18,6 +18,16 @@ final class FileUploadService
 
     public static function storeProductImage(array $file): string
     {
+        return self::storeImage($file, 'products');
+    }
+
+    public static function storeAdImage(array $file): string
+    {
+        return self::storeImage($file, 'ads');
+    }
+
+    private static function storeImage(array $file, string $subdir): string
+    {
         if (($file['error'] ?? UPLOAD_ERR_NO_FILE) === UPLOAD_ERR_NO_FILE) {
             throw new ValidationException(['image' => 'No file was uploaded.']);
         }
@@ -40,14 +50,14 @@ final class FileUploadService
         // survive as anything other than pixel data, and never trust the client filename.
         $extension = self::ALLOWED_MIME[$mime];
         $filename = bin2hex(random_bytes(16)) . '.' . $extension;
-        $uploadDir = base_path('public/uploads/products');
+        $uploadDir = base_path('public/uploads/' . $subdir);
         $destination = $uploadDir . '/' . $filename;
 
         if (!is_dir($uploadDir)) {
             mkdir($uploadDir, 0755, true);
         }
         if (!is_writable($uploadDir)) {
-            throw new ValidationException(['image' => 'The server cannot write to the uploads folder. Ask your host to fix the folder permissions on public/uploads/products.']);
+            throw new ValidationException(['image' => "The server cannot write to the uploads folder. Ask your host to fix the folder permissions on public/uploads/{$subdir}."]);
         }
 
         $image = match ($mime) {
@@ -73,6 +83,6 @@ final class FileUploadService
             throw new ValidationException(['image' => 'Failed to save the uploaded image. Please try again.']);
         }
 
-        return '/uploads/products/' . $filename;
+        return '/uploads/' . $subdir . '/' . $filename;
     }
 }
