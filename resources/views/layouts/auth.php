@@ -19,7 +19,7 @@
         <img class="brand-mark lg" src="<?= asset('img/logo-mark.svg') ?>" alt=""><?= e((string) setting('site_name', 'Billions Earn')) ?>
       </a>
     </div>
-    <div class="glass-card auth-card glow-ring" style="padding:28px 24px;">
+    <div class="glass-card auth-card glow-border" style="padding:28px 24px;">
       <?= view('partials.flash') ?>
       <?= $content ?>
     </div>

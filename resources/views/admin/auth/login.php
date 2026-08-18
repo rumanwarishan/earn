@@ -15,7 +15,7 @@
   <div class="auth-glow auth-glow-b"></div>
   <div class="container" style="max-width:380px;position:relative;">
     <div class="text-center mb-3 flex items-center gap-2" style="justify-content:center;font-weight:700;font-size:19px;"><img class="brand-mark" src="<?= asset('img/logo-mark.svg') ?>" alt=""> Earn Admin</div>
-    <div class="glass-card auth-card glow-ring" style="padding:28px 24px;">
+    <div class="glass-card auth-card glow-border" style="padding:28px 24px;">
       <?= view('partials.flash') ?>
       <h2 class="mb-3">Admin sign in</h2>
       <form method="POST" action="/admin/login">
