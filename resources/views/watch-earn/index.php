@@ -22,13 +22,12 @@
          data-type="<?= e($ad['type']) ?>">
       <div class="img-wrap">
         <?php if (!empty($ad['image_path'])): ?>
-          <img src="<?= e($ad['image_path']) ?>" alt="<?= e($ad['title']) ?>" loading="lazy">
+          <img src="<?= e($ad['image_path']) ?>" alt="<?= e($ad['title']) ?>" loading="lazy" onerror="this.style.display='none';this.parentElement.querySelector('.img-fallback').style.display='flex';">
         <?php elseif ($ad['type'] === 'video' && !empty($ad['destination_url'])): ?>
-          <img src="https://img.youtube.com/vi/<?= e($ad['destination_url']) ?>/hqdefault.jpg" alt="<?= e($ad['title']) ?>" loading="lazy">
+          <img src="https://img.youtube.com/vi/<?= e($ad['destination_url']) ?>/hqdefault.jpg" alt="<?= e($ad['title']) ?>" loading="lazy" onerror="this.style.display='none';this.parentElement.querySelector('.img-fallback').style.display='flex';">
           <span class="ad-play-badge">▶</span>
-        <?php else: ?>
-          <div class="flex items-center justify-center" style="height:100%;font-size:28px;">📺</div>
         <?php endif; ?>
+        <div class="img-fallback flex items-center justify-center" style="height:100%;font-size:28px;<?= (!empty($ad['image_path']) || ($ad['type'] === 'video' && !empty($ad['destination_url']))) ? 'display:none;' : '' ?>">📺</div>
       </div>
       <div class="body">
         <div class="title"><?= e($ad['title']) ?></div>

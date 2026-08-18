@@ -30,7 +30,7 @@ if ($adType === 'video' && !empty($ad['destination_url'])) {
   </div>
 
   <div class="field"><label>Banner image<?= $adType !== 'image' ? ' (optional)' : '' ?></label><input class="input" type="file" name="image" accept="image/*">
-    <?php if (!empty($ad['image_path'])): ?><img src="<?= e($ad['image_path']) ?>" style="max-width:160px;border-radius:8px;margin-top:8px;display:block;"><?php endif; ?>
+    <?php if (!empty($ad['image_path'])): ?><img src="<?= e($ad['image_path']) ?>" style="max-width:160px;border-radius:8px;margin-top:8px;display:block;" onerror="this.replaceWith(Object.assign(document.createElement('div'),{className:'text-muted',style:'font-size:12px;margin-top:8px;',textContent:'Current image file is missing - upload a new one to replace it.'}))"><?php endif; ?>
   </div>
 
   <div id="destination_field" class="field" style="<?= ($adType === 'external' || $adType === 'video') ? '' : 'display:none;' ?>">

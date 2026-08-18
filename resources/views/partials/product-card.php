@@ -7,10 +7,9 @@ $cashbackLabel = $product['cashback_type'] === 'percentage' ? rtrim(rtrim((strin
 <a class="glass-card product-card" href="/shop/<?= e($product['slug']) ?>">
   <div class="img-wrap">
     <?php if (!empty($product['image_path'])): ?>
-      <img src="<?= e($product['image_path']) ?>" alt="<?= e($product['name']) ?>" loading="lazy">
-    <?php else: ?>
-      <div class="flex items-center justify-center" style="height:100%;font-size:28px;">🛒</div>
+      <img src="<?= e($product['image_path']) ?>" alt="<?= e($product['name']) ?>" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
     <?php endif; ?>
+    <div class="flex items-center justify-center" style="height:100%;font-size:28px;<?= empty($product['image_path']) ? '' : 'display:none;' ?>">🛒</div>
   </div>
   <div class="body">
     <span class="badge badge-muted"><?= e($product['marketplace_name'] ?? '') ?></span>

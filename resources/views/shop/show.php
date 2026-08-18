@@ -10,10 +10,9 @@ $canAfford = $isDropship && $spendable !== null && bccomp($spendable, (string) $
 <div class="glass-card mb-3" style="overflow:hidden;">
   <div style="aspect-ratio:1.4/1;background:var(--surface-2);">
     <?php if ($product['image_path']): ?>
-      <img src="<?= e($product['image_path']) ?>" alt="<?= e($product['name']) ?>" style="width:100%;height:100%;object-fit:cover;">
-    <?php else: ?>
-      <div class="flex items-center justify-center" style="height:100%;font-size:48px;">🛒</div>
+      <img src="<?= e($product['image_path']) ?>" alt="<?= e($product['name']) ?>" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
     <?php endif; ?>
+    <div class="flex items-center justify-center" style="height:100%;font-size:48px;<?= $product['image_path'] ? 'display:none;' : '' ?>">🛒</div>
   </div>
   <div style="padding:20px;">
     <span class="badge badge-muted mb-3"><?= $isDropship ? 'Ships from ' . e($product['marketplace_name']) : e($product['marketplace_name']) ?></span>

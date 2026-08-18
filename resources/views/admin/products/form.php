@@ -66,7 +66,7 @@
 
   <div class="field"><label>Tags (comma-separated)</label><input class="input" type="text" name="tags" value="<?= e($product['tags'] ?? '') ?>"></div>
   <div class="field"><label>Product image</label><input class="input" type="file" name="image" accept="image/*">
-    <?php if (!empty($product['image_path'])): ?><img src="<?= e($product['image_path']) ?>" style="max-width:120px;border-radius:8px;margin-top:8px;"><?php endif; ?>
+    <?php if (!empty($product['image_path'])): ?><img src="<?= e($product['image_path']) ?>" style="max-width:120px;border-radius:8px;margin-top:8px;" onerror="this.replaceWith(Object.assign(document.createElement('div'),{className:'text-muted',style:'font-size:12px;margin-top:8px;',textContent:'Current image file is missing - upload a new one to replace it.'}))"><?php endif; ?>
   </div>
 
   <div class="flex gap-3 mb-3">

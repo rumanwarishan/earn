@@ -160,6 +160,38 @@ img { max-width: 100%; display: block; }
   .glow-ring::before { animation: none; }
 }
 
+/* ---------- Reusable: constantly-moving RGB light traveling the BORDER ----------
+   Cheaper than .glow-ring (no blur filter) so it's safe to put on many small
+   cards at once - stat tiles, admin panels - without the halo overlap/GPU cost
+   of stacking dozens of blurred glow-rings side by side. A conic-gradient is
+   masked down to a thin ring exactly on the card's own edge via mask-composite,
+   so it is immune to overflow:hidden clipping the way .glow-ring's oversized
+   halo would be. */
+@property --border-angle {
+  syntax: '<angle>';
+  inherits: false;
+  initial-value: 0deg;
+}
+.glow-border { position: relative; z-index: 0; }
+.glow-border::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1.5px;
+  background: conic-gradient(from var(--border-angle), var(--cyan), var(--violet), var(--magenta), var(--orange), var(--emerald), var(--cyan));
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0.85;
+  animation: borderAngleSpin 5s linear infinite;
+  pointer-events: none;
+}
+@keyframes borderAngleSpin { to { --border-angle: 360deg; } }
+@media (prefers-reduced-motion: reduce) {
+  .glow-border::after { animation: none; }
+}
+
 /* QR code frame - white quiet-zone padding preserved for scannability, tighter glow */
 .qr-frame {
   display: inline-block;
@@ -293,7 +325,24 @@ select.input option { background: var(--bg-1); color: var(--text-hi); }
 
 /* ---------- Cards / stats ---------- */
 .stat-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
-.stat-tile { padding: 16px; }
+.stat-tile { padding: 16px; position: relative; z-index: 0; }
+.stat-tile::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1.5px;
+  background: conic-gradient(from var(--border-angle), var(--cyan), var(--violet), var(--magenta), var(--orange), var(--emerald), var(--cyan));
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0.85;
+  animation: borderAngleSpin 5s linear infinite;
+  pointer-events: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .stat-tile::after { animation: none; }
+}
 .stat-tile .label { font-size: 12px; color: var(--text-lo); margin-bottom: 6px; }
 .stat-tile .value { font-size: 19px; font-weight: 700; }
 
