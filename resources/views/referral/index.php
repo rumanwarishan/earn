@@ -1,7 +1,7 @@
 <h2 class="mb-3">Invite &amp; earn</h2>
 
-<div class="glass-card text-center mb-3 glow-ring" style="padding:24px;">
-  <div class="qr-frame glow-ring">
+<div class="glass-card text-center mb-3 glow-border" style="padding:24px;">
+  <div class="qr-frame glow-border">
     <img src="<?= $qrDataUri ?>" alt="Referral QR code">
   </div>
   <div class="text-muted" style="font-size:12.5px;">Your referral code</div>

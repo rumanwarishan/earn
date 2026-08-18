@@ -4,8 +4,8 @@
   <div class="alert alert-error">Deposits are temporarily unavailable. Please check back soon.</div>
 <?php else: ?>
 
-<div class="glass-card text-center mb-3 glow-ring" style="padding:24px;">
-  <div class="qr-frame glow-ring">
+<div class="glass-card text-center mb-3 glow-border" style="padding:24px;">
+  <div class="qr-frame glow-border">
     <img src="<?= $qrDataUri ?>" alt="BTC deposit QR code">
   </div>
   <div class="glass-panel mono" style="padding:12px;word-break:break-all;font-size:13px;margin-top:16px;"><?= e($address) ?></div>
@@ -26,7 +26,7 @@
   <div class="mt-2">Your deposit is not confirmed until an admin approves it - never treat a broadcast transaction as credited funds.</div>
 </div>
 
-<form method="POST" action="/wallet/deposit" class="glass-card mb-3 glow-ring" style="padding:20px;">
+<form method="POST" action="/wallet/deposit" class="glass-card mb-3 glow-border" style="padding:20px;">
   <?= csrf_field() ?>
   <div class="field">
     <label>BTC amount sent</label>
