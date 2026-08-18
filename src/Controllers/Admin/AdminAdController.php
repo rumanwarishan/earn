@@ -89,9 +89,19 @@ final class AdminAdController
             if (trim((string) $data['title']) === '') {
                 throw new ValidationException(['title' => 'Advertisement title is required.']);
             }
-            $type = in_array($data['type'], ['image', 'external'], true) ? $data['type'] : 'image';
-            if ($type === 'external' && !filter_var($data['destination_url'], FILTER_VALIDATE_URL)) {
-                throw new ValidationException(['destination_url' => 'A valid destination URL is required for external ads.']);
+            $type = in_array($data['type'], ['image', 'external', 'video'], true) ? $data['type'] : 'image';
+            $destinationUrl = trim((string) ($data['destination_url'] ?? '')) ?: null;
+
+            if ($type === 'external') {
+                if (!filter_var($destinationUrl, FILTER_VALIDATE_URL)) {
+                    throw new ValidationException(['destination_url' => 'A valid destination URL is required for external ads.']);
+                }
+            } elseif ($type === 'video') {
+                $videoId = self::extractYoutubeId((string) $destinationUrl);
+                if ($videoId === null) {
+                    throw new ValidationException(['destination_url' => 'Enter a valid YouTube video URL (youtube.com/watch?v=... or youtu.be/...).']);
+                }
+                $destinationUrl = $videoId;
             }
             if (!preg_match('/^\d+(\.\d{1,2})?$/', (string) $data['reward_amount'])) {
                 throw new ValidationException(['reward_amount' => 'Enter a valid reward amount.']);
@@ -119,7 +129,6 @@ final class AdminAdController
 
             $isActive = isset($data['is_active']) ? 1 : 0;
             $sortOrder = (int) ($data['sort_order'] ?: 0);
-            $destinationUrl = trim((string) ($data['destination_url'] ?? '')) ?: null;
             $description = trim((string) ($data['description'] ?? '')) ?: null;
 
             if ($id === null) {
@@ -191,5 +200,14 @@ final class AdminAdController
         AuditLogger::log('admin', $admin['id'], 'ad.deleted', 'advertisement', $id, null, null, null, $request->ip());
         flash_success('Advertisement deleted.');
         redirect('/admin/ads');
+    }
+
+    /** Extracts the 11-character YouTube video ID from any common URL shape, or null if the input isn't one. */
+    private static function extractYoutubeId(string $url): ?string
+    {
+        if (preg_match('#(?:youtube\.com/(?:watch\?v=|embed/|shorts/)|youtu\.be/)([A-Za-z0-9_-]{11})#', $url, $m)) {
+            return $m[1];
+        }
+        return null;
     }
 }

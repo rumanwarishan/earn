@@ -6,9 +6,12 @@
 .admin-nav { display: flex; flex-direction: column; padding: 8px; gap: 2px; }
 .admin-nav a {
   padding: 11px 14px; border-radius: 10px; font-size: 13.5px; font-weight: 500; color: var(--text-mid);
+  display: flex; align-items: center; gap: 11px;
 }
-.admin-nav a.active { background: linear-gradient(135deg, rgba(62,203,255,0.14), rgba(155,107,255,0.14)); color: var(--text-hi); }
-.admin-nav a:hover { background: var(--surface-1); }
+.admin-nav a svg { width: 18px; height: 18px; flex-shrink: 0; }
+.admin-nav a.active { background: linear-gradient(135deg, rgba(255,138,61,0.16), rgba(255,107,61,0.14)); color: var(--orange-hi); }
+.admin-nav a.active svg { filter: drop-shadow(0 0 5px rgba(255,138,61,0.5)); }
+.admin-nav a:hover { background: var(--surface-1); color: var(--text-hi); }
 .admin-main { flex: 1; min-width: 0; }
 .admin-topbar {
   position: sticky; top: 0; z-index: 20; background: rgba(7,7,12,0.8); backdrop-filter: blur(14px);

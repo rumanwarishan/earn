@@ -40,7 +40,7 @@ $oneTimeTasks = array_filter($tasks, fn ($t) => $t['type'] === 'one_time');
 </div>
 
 <?php if (!$orders): ?>
-  <div class="empty-state"><div class="icon">📦</div>No purchases yet. <a href="/shop" style="color:var(--cyan);">Start shopping</a> to earn cashback.</div>
+  <div class="empty-state"><div class="icon">📦</div>No purchases yet. <a href="/shop" style="color:var(--orange);">Start shopping</a> to earn cashback.</div>
 <?php else: ?>
 <div class="glass-card">
   <?php foreach ($orders as $o): ?>

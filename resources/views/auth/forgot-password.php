@@ -8,4 +8,4 @@
   </div>
   <button class="btn btn-primary" type="submit">Send reset link</button>
 </form>
-<p class="text-center mt-4"><a href="/login" style="color:var(--cyan);font-weight:600;">Back to login</a></p>
+<p class="text-center mt-4"><a href="/login" style="color:var(--orange);font-weight:600;">Back to login</a></p>

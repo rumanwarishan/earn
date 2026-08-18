@@ -13,7 +13,7 @@
   <?php endif; ?>
 </div>
 
-<div class="glass-card mb-3" style="padding:20px;background:linear-gradient(135deg, rgba(62,203,255,0.10), rgba(155,107,255,0.10));">
+<div class="glass-card mb-3 glow-ring" style="padding:20px;background:linear-gradient(135deg, rgba(255,138,61,0.12), rgba(255,107,61,0.08));">
   <div class="text-muted" style="font-size:12.5px;">Wallet balance</div>
   <div style="font-size:30px;font-weight:750;margin:4px 0 14px;"><?= money($spendable) ?></div>
   <div class="quick-actions">
@@ -84,7 +84,7 @@
   </div>
   <?php $pct = $nextLevel['min_total_deposited'] > 0 ? min(100, (float) $wallet['total_deposited'] / (float) $nextLevel['min_total_deposited'] * 100) : 0; ?>
   <div style="height:8px;border-radius:999px;background:var(--surface-2);overflow:hidden;">
-    <div style="height:100%;width:<?= (int) $pct ?>%;background:linear-gradient(90deg, var(--cyan), var(--violet));"></div>
+    <div style="height:100%;width:<?= (int) $pct ?>%;background:linear-gradient(90deg, var(--orange), var(--orange-hi));"></div>
   </div>
 </div>
 <?php endif; ?>

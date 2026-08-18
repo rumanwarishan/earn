@@ -12,4 +12,4 @@
   <div class="text-center mt-2 mb-3"><a href="/forgot-password" style="color:var(--text-mid);font-size:13px;">Forgot password?</a></div>
   <button class="btn btn-primary" type="submit">Log in</button>
 </form>
-<p class="text-center mt-4">New here? <a href="/register" style="color:var(--cyan);font-weight:600;">Create an account</a></p>
+<p class="text-center mt-4">New here? <a href="/register" style="color:var(--orange);font-weight:600;">Create an account</a></p>

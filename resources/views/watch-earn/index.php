@@ -23,6 +23,9 @@
       <div class="img-wrap">
         <?php if (!empty($ad['image_path'])): ?>
           <img src="<?= e($ad['image_path']) ?>" alt="<?= e($ad['title']) ?>" loading="lazy">
+        <?php elseif ($ad['type'] === 'video' && !empty($ad['destination_url'])): ?>
+          <img src="https://img.youtube.com/vi/<?= e($ad['destination_url']) ?>/hqdefault.jpg" alt="<?= e($ad['title']) ?>" loading="lazy">
+          <span class="ad-play-badge">▶</span>
         <?php else: ?>
           <div class="flex items-center justify-center" style="height:100%;font-size:28px;">📺</div>
         <?php endif; ?>

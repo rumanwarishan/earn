@@ -37,9 +37,20 @@
     var destination = card.getAttribute('data-destination');
     var type = card.getAttribute('data-type');
 
+    var mediaHtml = '';
+    if (type === 'video' && destination) {
+      mediaHtml =
+        '<div style="position:relative;width:100%;padding-top:56.25%;border-radius:12px;overflow:hidden;margin-bottom:14px;">' +
+        '<iframe src="https://www.youtube.com/embed/' + escapeAttr(destination) + '?autoplay=1&rel=0" ' +
+        'style="position:absolute;top:0;left:0;width:100%;height:100%;border:0;" allow="autoplay; encrypted-media" allowfullscreen></iframe>' +
+        '</div>';
+    } else if (image) {
+      mediaHtml = '<img src="' + escapeAttr(image) + '" style="width:100%;border-radius:12px;margin-bottom:14px;">';
+    }
+
     modalBody.innerHTML =
       '<h3 style="margin-bottom:12px;">' + escapeHtml(title) + '</h3>' +
-      (image ? '<img src="' + escapeAttr(image) + '" style="width:100%;border-radius:12px;margin-bottom:14px;">' : '') +
+      mediaHtml +
       (type === 'external' && destination
         ? '<a href="' + escapeAttr(destination) + '" target="_blank" rel="noopener" class="btn btn-secondary btn-sm mb-3" style="display:block;text-align:center;">Open advertisement</a>'
         : '') +

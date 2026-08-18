@@ -1,7 +1,7 @@
 <?php $spendable = \App\Services\WalletService::spendableBalance($wallet); ?>
 <h2 class="mb-3">Wallet</h2>
 
-<div class="glass-card mb-3" style="padding:20px;">
+<div class="glass-card mb-3 glow-ring" style="padding:20px;">
   <div class="text-muted" style="font-size:12.5px;">Total balance</div>
   <div style="font-size:28px;font-weight:750;margin:4px 0 16px;"><?= money($spendable) ?></div>
   <div class="stat-grid">

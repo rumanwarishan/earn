@@ -7,5 +7,5 @@
     <input type="hidden" name="uid" value="<?= (int) ($uid ?? 0) ?>">
     <button class="btn btn-secondary" type="submit">Resend verification email</button>
   </form>
-  <p class="mt-4"><a href="/login" style="color:var(--cyan);font-weight:600;">Back to login</a></p>
+  <p class="mt-4"><a href="/login" style="color:var(--orange);font-weight:600;">Back to login</a></p>
 </div>

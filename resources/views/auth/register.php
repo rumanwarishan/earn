@@ -25,4 +25,4 @@
   </div>
   <button class="btn btn-primary mt-2" type="submit">Create account</button>
 </form>
-<p class="text-center mt-4">Already have an account? <a href="/login" style="color:var(--cyan);font-weight:600;">Log in</a></p>
+<p class="text-center mt-4">Already have an account? <a href="/login" style="color:var(--orange);font-weight:600;">Log in</a></p>
