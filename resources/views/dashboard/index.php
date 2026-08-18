@@ -39,7 +39,7 @@
 <?php if ($dailyTasks): ?>
 <div class="section-head"><h3>Daily task</h3><a href="/tasks">All tasks</a></div>
 <?php foreach ($dailyTasks as $task): ?>
-  <div class="glass-card glow-ring mb-3" style="padding:18px;">
+  <div class="glass-card glow-border-soft mb-3" style="padding:18px;">
     <div class="flex items-center justify-between">
       <div style="padding-right:12px;">
         <div style="font-size:14px;font-weight:650;"><?= e($task['title']) ?></div>

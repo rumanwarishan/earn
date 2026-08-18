@@ -11,7 +11,7 @@ $oneTimeTasks = array_filter($tasks, fn ($t) => $t['type'] === 'one_time');
   <?php foreach (['Welcome' => $welcomeTasks, 'Daily' => $dailyTasks, 'Bonus' => $oneTimeTasks] as $label => $group): ?>
     <?php if (!$group): continue; endif; ?>
     <div class="section-head"><h3><?= e($label) ?> tasks</h3></div>
-    <div class="glass-card glow-ring mb-3">
+    <div class="glass-card glow-border mb-3">
       <?php foreach ($group as $task): ?>
         <div class="flex items-center justify-between" style="padding:14px 16px;border-bottom:1px solid rgba(255,255,255,0.05);">
           <div style="padding-right:12px;">

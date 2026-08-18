@@ -1,7 +1,7 @@
 <h2 class="mb-2">Watch &amp; Earn</h2>
 <p class="text-muted mb-3" style="font-size:13.5px;">Watch available advertisements and earn rewards directly into your Billions Earn wallet.</p>
 
-<div class="glass-card mb-3 glow-ring" style="padding:20px;">
+<div class="glass-card mb-3 glow-border-soft" style="padding:20px;">
   <div class="text-muted" style="font-size:12.5px;">Wallet balance</div>
   <div style="font-size:26px;font-weight:750;margin:4px 0;"><?= money($spendable) ?></div>
 </div>

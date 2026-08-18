@@ -98,7 +98,13 @@ img { max-width: 100%; display: block; }
 
 /* ---------- Glass surfaces ---------- */
 .glass-card {
-  background: linear-gradient(180deg, var(--surface-2), var(--surface-1));
+  /* Near-opaque, not just tinted-translucent: backdrop-filter below actively
+     samples and blurs whatever sits behind the card, including the page-wide
+     .ambient-bg layer - at low opacity that blur let the ambient colors wash
+     across the whole card face as a big diffuse block. This keeps enough
+     translucency for a frosted-glass edge without letting the background
+     dominate the card's own interior. */
+  background: linear-gradient(180deg, rgba(22,21,28,0.90), rgba(15,14,19,0.94));
   border: 1px solid var(--surface-border);
   border-radius: var(--radius-lg);
   backdrop-filter: blur(18px);

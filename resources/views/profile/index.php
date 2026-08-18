@@ -1,6 +1,6 @@
 <h2 class="mb-3">Profile</h2>
 
-<div class="glass-card mb-3 glow-ring" style="padding:22px;text-align:center;">
+<div class="glass-card mb-3 glow-border" style="padding:22px;text-align:center;">
   <div style="width:64px;height:64px;border-radius:50%;margin:0 auto 12px;background:linear-gradient(135deg, var(--orange), #ff6b3d);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:22px;">
     <?= e(mb_strtoupper(mb_substr($profile['full_name'], 0, 1))) ?>
   </div>
