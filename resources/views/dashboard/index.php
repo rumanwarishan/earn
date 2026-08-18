@@ -13,7 +13,7 @@
   <?php endif; ?>
 </div>
 
-<div class="glass-card mb-3 glow-ring" style="padding:20px;background:linear-gradient(135deg, rgba(255,138,61,0.12), rgba(255,107,61,0.08));">
+<div class="glass-card mb-3 glow-border-soft" style="padding:20px;background:linear-gradient(135deg, rgba(24,17,13,0.92), rgba(16,12,10,0.94));">
   <div class="text-muted" style="font-size:12.5px;">Wallet balance</div>
   <div style="font-size:30px;font-weight:750;margin:4px 0 14px;"><?= money($spendable) ?></div>
   <div class="quick-actions">

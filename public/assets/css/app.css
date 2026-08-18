@@ -192,6 +192,31 @@ img { max-width: 100%; display: block; }
   .glow-border::after { animation: none; }
 }
 
+/* Softer variant for large hero cards (wallet balance, etc.) - lower
+   opacity and a gentle blur so the moving light reads as an ambient glow
+   right at the edge instead of a hard neon line or a big color wash
+   spilling across the card's own background.
+   Deliberately NOT a conic-gradient (masked border or blurred ellipse
+   alike): on a very wide, short card, mapping angles onto such an
+   elongated shape compresses color transitions near the left/right
+   edges into a visible vertical stripe once blurred - reproduced and
+   confirmed with both approaches. A hue-cycling blurred box-shadow has
+   no angle-to-position mapping to distort in the first place, so it
+   stays a smooth, even glow around the border at any aspect ratio. */
+@property --glow-hue {
+  syntax: '<number>';
+  inherits: false;
+  initial-value: 0;
+}
+.glow-border-soft {
+  animation: glowHueCycle 10s linear infinite;
+  box-shadow: 0 0 34px 3px hsl(var(--glow-hue) 90% 62% / 0.32);
+}
+@keyframes glowHueCycle { to { --glow-hue: 360; } }
+@media (prefers-reduced-motion: reduce) {
+  .glow-border-soft { animation: none; }
+}
+
 /* QR code frame - white quiet-zone padding preserved for scannability, tighter glow */
 .qr-frame {
   display: inline-block;
