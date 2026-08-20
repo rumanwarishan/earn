@@ -10,9 +10,11 @@ $cashbackLabel = $product['cashback_type'] === 'percentage' ? rtrim(rtrim((strin
       <img src="<?= e($product['image_path']) ?>" alt="<?= e($product['name']) ?>" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
     <?php endif; ?>
     <div class="flex items-center justify-center" style="height:100%;font-size:28px;<?= empty($product['image_path']) ? '' : 'display:none;' ?>">🛒</div>
+    <?php if (!empty($product['marketplace_name'])): ?>
+      <span class="marketplace-chip"><?= e($product['marketplace_name']) ?></span>
+    <?php endif; ?>
   </div>
   <div class="body">
-    <span class="badge badge-muted"><?= e($product['marketplace_name'] ?? '') ?></span>
     <div class="title"><?= e($product['name']) ?></div>
     <div class="price-row">
       <span class="price"><?= money($product['display_price']) ?></span>
@@ -23,6 +25,6 @@ $cashbackLabel = $product['cashback_type'] === 'percentage' ? rtrim(rtrim((strin
     <?php if ($product['cashback_enabled']): ?>
       <span class="badge badge-emerald mb-3"><?= $cashbackLabel ?> cashback · earn <?= money($cashbackAmount) ?></span>
     <?php endif; ?>
-    <div class="btn btn-primary btn-sm w-full mt-2" style="text-align:center;">Shop Now</div>
+    <div class="btn btn-primary btn-sm w-full mt-auto" style="text-align:center;">Shop Now</div>
   </div>
 </a>

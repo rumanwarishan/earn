@@ -12,11 +12,20 @@
 
 <div class="glass-card table-wrap">
   <table class="data-table">
-    <thead><tr><th>Advertisement</th><th>Type</th><th>Reward</th><th>Watch time</th><th>Completions</th><th>Paid</th><th>Active</th><th></th></tr></thead>
+    <thead><tr><th>Image</th><th>Advertisement</th><th>Type</th><th>Reward</th><th>Watch time</th><th>Completions</th><th>Paid</th><th>Active</th><th></th></tr></thead>
     <tbody>
-      <?php if (!$ads): ?><tr><td colspan="8" class="text-muted">No advertisements yet.</td></tr><?php endif; ?>
+      <?php if (!$ads): ?><tr><td colspan="9" class="text-muted">No advertisements yet.</td></tr><?php endif; ?>
       <?php foreach ($ads as $a): ?>
         <tr>
+          <td>
+            <?php if (!empty($a['image_path'])): ?>
+              <img class="admin-thumb" src="<?= e($a['image_path']) ?>" alt="" loading="lazy" onerror="this.outerHTML='<span class=&quot;admin-thumb admin-thumb-missing&quot; title=&quot;File missing on server&quot;>⚠</span>';">
+            <?php elseif ($a['type'] === 'video' && !empty($a['destination_url'])): ?>
+              <img class="admin-thumb" src="https://img.youtube.com/vi/<?= e($a['destination_url']) ?>/default.jpg" alt="" loading="lazy" onerror="this.outerHTML='<span class=&quot;admin-thumb admin-thumb-missing&quot; title=&quot;YouTube thumbnail unavailable&quot;>⚠</span>';">
+            <?php else: ?>
+              <span class="admin-thumb-empty" title="No image uploaded">—</span>
+            <?php endif; ?>
+          </td>
           <td class="cell-truncate" title="<?= e($a['title']) ?>"><?= e($a['title']) ?></td>
           <td><span class="badge badge-muted"><?= e(ucfirst($a['type'])) ?></span></td>
           <td><?= money($a['reward_amount']) ?></td>

@@ -10,11 +10,18 @@
 
 <div class="glass-card table-wrap">
   <table class="data-table">
-    <thead><tr><th>Product</th><th>Marketplace</th><th>Price</th><th>Cashback</th><th>Featured</th><th>Published</th><th></th></tr></thead>
+    <thead><tr><th>Image</th><th>Product</th><th>Marketplace</th><th>Price</th><th>Cashback</th><th>Featured</th><th>Published</th><th></th></tr></thead>
     <tbody>
-      <?php if (!$products): ?><tr><td colspan="7" class="text-muted">No products yet.</td></tr><?php endif; ?>
+      <?php if (!$products): ?><tr><td colspan="8" class="text-muted">No products yet.</td></tr><?php endif; ?>
       <?php foreach ($products as $p): ?>
         <tr>
+          <td>
+            <?php if (!empty($p['image_path'])): ?>
+              <img class="admin-thumb" src="<?= e($p['image_path']) ?>" alt="" loading="lazy" onerror="this.outerHTML='<span class=&quot;admin-thumb admin-thumb-missing&quot; title=&quot;File missing on server&quot;>⚠</span>';">
+            <?php else: ?>
+              <span class="admin-thumb-empty" title="No image uploaded">—</span>
+            <?php endif; ?>
+          </td>
           <td class="cell-truncate" title="<?= e($p['name']) ?>"><?= e($p['name']) ?></td>
           <td><?= e($p['marketplace_name']) ?></td>
           <td><?= money($p['display_price']) ?></td>
