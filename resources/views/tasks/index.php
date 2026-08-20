@@ -14,18 +14,27 @@ $oneTimeTasks = array_filter($tasks, fn ($t) => $t['type'] === 'one_time');
     <div class="glass-card glow-border mb-3">
       <?php foreach ($group as $task): ?>
         <div class="flex items-center justify-between" style="padding:14px 16px;border-bottom:1px solid rgba(255,255,255,0.05);">
+          <?php
+            $alreadyClaimed = $task['type'] === 'daily' ? (int) $task['completed_today'] > 0 : (int) $task['completed_ever'] > 0;
+            $hasProgress = $task['progress_count'] !== null;
+          ?>
           <div style="padding-right:12px;">
             <div style="font-size:13.5px;font-weight:600;"><?= e($task['title']) ?></div>
             <?php if ($task['description']): ?><div class="text-muted" style="font-size:11.5px;margin-top:2px;"><?= e($task['description']) ?></div><?php endif; ?>
             <div class="mt-2" style="font-size:12.5px;color:var(--emerald);font-weight:600;">+<?= money($task['reward_amount']) ?></div>
+            <?php if ($hasProgress && !$alreadyClaimed): ?>
+              <div class="text-muted mt-1" style="font-size:11px;"><?= min((int) $task['progress_count'], (int) $task['criteria_target']) ?> / <?= (int) $task['criteria_target'] ?> completed</div>
+            <?php endif; ?>
           </div>
-          <?php if ($task['is_claimable']): ?>
+          <?php if ($alreadyClaimed): ?>
+            <span class="badge badge-emerald">Done<?= $task['type'] === 'daily' ? ' today' : '' ?></span>
+          <?php elseif ($task['is_claimable']): ?>
             <form method="POST" action="/tasks/<?= (int) $task['id'] ?>/claim">
               <?= csrf_field() ?>
               <button class="btn btn-primary btn-sm" type="submit">Claim</button>
             </form>
           <?php else: ?>
-            <span class="badge badge-emerald">Done<?= $task['type'] === 'daily' ? ' today' : '' ?></span>
+            <span class="badge badge-muted">In progress</span>
           <?php endif; ?>
         </div>
       <?php endforeach; ?>

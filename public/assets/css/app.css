@@ -513,12 +513,21 @@ table.data-table tr:hover td:last-child { background: #14141f; }
   border: 1px solid rgba(255,255,255,0.25);
   box-shadow: 0 10px 30px rgba(255,138,61,0.35);
 }
+/* Crisp neon ring hugging the icon's own edge - not a blurred oversized
+   halo - so it reads as a lit border box around the icon instead of a
+   diffuse color wash spilling across the corner of the screen. */
 .chat-fab-ring {
-  position: absolute; inset: -5px; border-radius: 50%;
-  background: conic-gradient(from 0deg, var(--cyan), var(--violet), var(--magenta), var(--orange), var(--emerald), var(--cyan));
-  filter: blur(9px); opacity: 0.85;
-  animation: glowRingSpin 5s linear infinite;
+  position: absolute; inset: -3px; border-radius: 50%;
+  padding: 2px;
+  background: conic-gradient(from var(--border-angle), var(--cyan), var(--violet), var(--magenta), var(--orange), var(--emerald), var(--cyan));
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  animation: borderAngleSpin 14s linear infinite;
   z-index: -1;
+}
+@media (prefers-reduced-motion: reduce) {
+  .chat-fab-ring { animation: none; }
 }
 .chat-window {
   position: fixed; bottom: 96px; right: 16px; z-index: 61; width: min(360px, calc(100vw - 32px));

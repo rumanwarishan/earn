@@ -56,6 +56,12 @@ final class FileUploadService
         if (!is_dir($uploadDir)) {
             mkdir($uploadDir, 0755, true);
         }
+        // mkdir()'s mode above is filtered through the process umask, so on hosts
+        // with a restrictive umask (common on shared hosting) the directory can
+        // end up non-traversable by the web server user even though PHP itself
+        // can still write to it - chmod explicitly rather than trusting mkdir's
+        // requested mode to survive the umask.
+        @chmod($uploadDir, 0755);
         if (!is_writable($uploadDir)) {
             throw new ValidationException(['image' => "The server cannot write to the uploads folder. Ask your host to fix the folder permissions on public/uploads/{$subdir}."]);
         }
@@ -82,6 +88,14 @@ final class FileUploadService
         if (!$written || !is_file($destination)) {
             throw new ValidationException(['image' => 'Failed to save the uploaded image. Please try again.']);
         }
+
+        // Same umask problem as the directory above: imagejpeg()/imagepng()/etc.
+        // create the file using the process's default mode minus the umask, which
+        // on a restrictive host can come out non-world-readable - the upload
+        // "succeeds" (PHP can read/write its own file) but the web server process
+        // serving it back to visitors gets permission-denied, rendering as a
+        // broken image on every single page that shows it. Force it explicitly.
+        @chmod($destination, 0644);
 
         return '/uploads/' . $subdir . '/' . $filename;
     }

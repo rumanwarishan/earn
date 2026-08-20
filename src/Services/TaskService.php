@@ -14,9 +14,36 @@ use RuntimeException;
  * calendar day), and "one_time" (once per account, ever) claimable quests.
  * Deliberately separate from cashback/referral rewards - a task reward is a
  * manual claim, not tied to any purchase or deposit.
+ *
+ * Some tasks (invite N friends, watch N ads, first purchase, first deposit)
+ * have a real, checkable signal elsewhere in the app - those carry a
+ * criteria_key/criteria_target and MUST have that verified server-side
+ * before a claim is allowed, both when deciding what to show as claimable
+ * and again inside claim() itself (never trust that the claim button was
+ * only shown because the criteria passed client-side - the route is a
+ * plain POST an attacker could hit directly). Tasks with no verifiable
+ * signal (daily check-in, social share) keep criteria_key NULL and stay
+ * honor-system, same as before.
  */
 final class TaskService
 {
+    private const CRITERIA_QUERIES = [
+        'referral_count' => 'SELECT COUNT(*) FROM referral_relationships WHERE referrer_user_id = ? AND level = 1',
+        'ad_watch_count' => 'SELECT COUNT(*) FROM ad_completions WHERE user_id = ?',
+        'first_purchase' => "SELECT COUNT(*) FROM orders WHERE user_id = ? AND status NOT IN ('cancelled','refunded')",
+        'first_deposit' => "SELECT COUNT(*) FROM deposits WHERE user_id = ? AND status = 'approved'",
+    ];
+
+    private static function progressFor(PDO $pdo, ?string $criteriaKey, int $userId): ?int
+    {
+        if ($criteriaKey === null || !isset(self::CRITERIA_QUERIES[$criteriaKey])) {
+            return null;
+        }
+        $stmt = $pdo->prepare(self::CRITERIA_QUERIES[$criteriaKey]);
+        $stmt->execute([$userId]);
+        return (int) $stmt->fetchColumn();
+    }
+
     public static function availableFor(int $userId): array
     {
         $pdo = Database::connection();
@@ -30,12 +57,17 @@ final class TaskService
         $stmt->execute([$userId, $userId]);
         $tasks = $stmt->fetchAll();
 
-        return array_map(static function (array $task): array {
-            $task['is_claimable'] = match ($task['type']) {
+        return array_map(static function (array $task) use ($pdo, $userId): array {
+            $notYetClaimed = match ($task['type']) {
                 'daily' => (int) $task['completed_today'] === 0,
                 'welcome', 'one_time' => (int) $task['completed_ever'] === 0,
                 default => false,
             };
+
+            $progress = self::progressFor($pdo, $task['criteria_key'], $userId);
+            $task['progress_count'] = $progress;
+            $task['criteria_met'] = $progress === null || $progress >= (int) $task['criteria_target'];
+            $task['is_claimable'] = $notYetClaimed && $task['criteria_met'];
             return $task;
         }, $tasks);
     }
@@ -56,6 +88,13 @@ final class TaskService
                 $stmt->execute([$taskId, $userId]);
                 if ((int) $stmt->fetchColumn() > 0) {
                     throw new RuntimeException('You already claimed this task.');
+                }
+            }
+
+            if ($task['criteria_key'] !== null) {
+                $progress = self::progressFor($pdo, $task['criteria_key'], $userId);
+                if ($progress === null || $progress < (int) $task['criteria_target']) {
+                    throw new RuntimeException('You have not met the requirements for this task yet.');
                 }
             }
 

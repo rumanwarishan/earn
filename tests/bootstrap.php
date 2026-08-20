@@ -64,7 +64,14 @@ $tables = [
     'wallet_ledger', 'wallets', 'deposit_reviews', 'deposits', 'withdrawal_reviews', 'withdrawals',
     'referral_rewards', 'referral_relationships', 'email_verifications', 'password_resets', 'login_attempts',
     'notifications', 'audit_logs', 'cashback_transactions', 'orders', 'product_clicks', 'chat_messages',
-    'invitation_codes', 'referral_settings', 'membership_levels', 'site_settings', 'users',
+    'invitation_codes', 'referral_settings', 'membership_levels', 'site_settings',
+    // TRUNCATE with FK checks off does not cascade - without these, rows left
+    // over from a previous local `composer test` run stay in these tables
+    // forever (users is reset and its AUTO_INCREMENT restarts, so a later run
+    // can mint a brand-new user that happens to reuse an old numeric id and
+    // silently "inherit" that stale user's leftover ad/task completions).
+    'ad_completions', 'ad_watch_sessions', 'advertisements', 'task_completions', 'tasks',
+    'users',
 ];
 $pdo->exec('SET FOREIGN_KEY_CHECKS = 0');
 foreach ($tables as $table) {
