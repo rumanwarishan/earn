@@ -28,6 +28,17 @@ $oneTimeTasks = array_filter($tasks, fn ($t) => $t['type'] === 'one_time');
           </div>
           <?php if ($alreadyClaimed): ?>
             <span class="badge badge-emerald">Done<?= $task['type'] === 'daily' ? ' today' : '' ?></span>
+          <?php elseif ($task['criteria_key'] === 'social_share' && $task['is_claimable']): ?>
+            <div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px;">
+              <div class="flex gap-2">
+                <button type="button" class="btn btn-secondary btn-sm" data-copy="<?= e($referralLink) ?>" data-copy-label="Invite link" data-reveal-claim="shareClaim<?= (int) $task['id'] ?>">Copy link</button>
+                <button type="button" class="btn btn-primary btn-sm" data-share-link="<?= e($referralLink) ?>" data-reveal-claim="shareClaim<?= (int) $task['id'] ?>">Share</button>
+              </div>
+              <form id="shareClaim<?= (int) $task['id'] ?>" method="POST" action="/tasks/<?= (int) $task['id'] ?>/claim" style="display:none;">
+                <?= csrf_field() ?>
+                <button class="btn btn-primary btn-sm" type="submit">Claim reward</button>
+              </form>
+            </div>
           <?php elseif ($task['is_claimable']): ?>
             <form method="POST" action="/tasks/<?= (int) $task['id'] ?>/claim">
               <?= csrf_field() ?>

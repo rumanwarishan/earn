@@ -31,6 +31,7 @@ final class TaskController
             'content' => view('tasks.index', [
                 'tasks' => TaskService::availableFor((int) $user['id']),
                 'orders' => $orders,
+                'referralLink' => app_url('/register?code=' . $user['referral_code']),
             ]),
         ]);
     }

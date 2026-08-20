@@ -27,4 +27,24 @@
       window.copyToClipboard(btn.getAttribute('data-copy'), btn.getAttribute('data-copy-label'));
     });
   });
+
+  document.querySelectorAll('[data-share-link]').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var url = btn.getAttribute('data-share-link');
+      if (navigator.share) {
+        navigator.share({ title: 'Join Billions Earn', url: url }).catch(function () {});
+      } else {
+        window.copyToClipboard(url, 'Invite link');
+      }
+    });
+  });
+
+  // "Share to unlock" tasks: the Claim button stays hidden until the user
+  // has clicked a share/copy action at least once.
+  document.querySelectorAll('[data-reveal-claim]').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var form = document.getElementById(btn.getAttribute('data-reveal-claim'));
+      if (form) form.style.display = 'inline-flex';
+    });
+  });
 })();

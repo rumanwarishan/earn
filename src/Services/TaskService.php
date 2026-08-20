@@ -91,7 +91,11 @@ final class TaskService
                 }
             }
 
-            if ($task['criteria_key'] !== null) {
+            // Only criteria_key values with an actual verification query (see
+            // CRITERIA_QUERIES) are enforced here - a key like 'social_share'
+            // has no verifiable signal and is intentionally left honor-system,
+            // same as a NULL criteria_key.
+            if (isset(self::CRITERIA_QUERIES[$task['criteria_key'] ?? ''])) {
                 $progress = self::progressFor($pdo, $task['criteria_key'], $userId);
                 if ($progress === null || $progress < (int) $task['criteria_target']) {
                     throw new RuntimeException('You have not met the requirements for this task yet.');

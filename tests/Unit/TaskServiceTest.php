@@ -111,6 +111,24 @@ final class TaskServiceTest extends TestCase
         return (int) $pdo->lastInsertId();
     }
 
+    public function test_social_share_task_stays_claimable_despite_non_null_criteria_key(): void
+    {
+        // 'social_share' is a real criteria_key (used by the Tasks page to
+        // show the share-then-claim UI) but has no verification query - it
+        // must behave exactly like a NULL criteria_key for claim purposes.
+        $pdo = Database::connection();
+        $user = TestSeed::createUser('task-ms-share');
+        $taskId = $this->makeMilestoneTask($pdo, 'social_share', 0, '5.00');
+
+        $available = TaskService::availableFor((int) $user['id']);
+        $task = current(array_filter($available, fn ($t) => (int) $t['id'] === $taskId));
+        $this->assertNull($task['progress_count']);
+        $this->assertTrue($task['is_claimable']);
+
+        $result = TaskService::claim((int) $user['id'], $taskId, '127.0.0.1');
+        $this->assertSame('5.00', $result['reward_amount']);
+    }
+
     public function test_milestone_task_is_not_claimable_before_criteria_met(): void
     {
         $pdo = Database::connection();
