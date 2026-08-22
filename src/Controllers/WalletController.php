@@ -7,6 +7,7 @@ namespace App\Controllers;
 use App\Core\Database;
 use App\Core\Request;
 use App\Core\Session;
+use App\Services\GamePointService;
 use App\Services\NotificationService;
 use App\Services\WalletService;
 
@@ -56,6 +57,7 @@ final class WalletController
                 'entries' => $entries,
                 'page' => $page,
                 'hasMore' => count($entries) === $perPage,
+                'bsBalance' => GamePointService::balance((int) $user['id']),
             ]),
         ]);
     }

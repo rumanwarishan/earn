@@ -185,12 +185,14 @@ if (!function_exists('btc_amount')) {
 }
 
 if (!function_exists('gp')) {
-    // Billions Flight virtual Game Points - deliberately never routed through
-    // money(), which prints a $ sign. GP has no cash value and must never be
-    // displayed as if it were currency.
+    // Billions Flight's in-game currency, displayed as "B$" (Billions Store
+    // Currency). Kept as its own formatter (not money()) so the game UI
+    // never LOOKS like it's quoting a USD amount directly - the actual
+    // USD value only exists once a user explicitly exchanges B$ to their
+    // wallet via GamePointService::exchangeToWallet() at the admin-set rate.
     function gp(string|float|int $amount): string
     {
-        return number_format((float) $amount, 2, '.', ',') . ' GP';
+        return 'B$' . number_format((float) $amount, 2, '.', ',');
     }
 }
 
@@ -240,6 +242,7 @@ if (!function_exists('ledger_label')) {
             'purchase_debit' => 'Purchase',
             'admin_credit' => 'Admin credit',
             'admin_debit' => 'Admin debit',
+            'game_exchange' => 'Billions Flight exchange',
             default => ucfirst(str_replace('_', ' ', $type)),
         };
     }

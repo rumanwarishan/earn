@@ -21,7 +21,6 @@
   var balanceEl = document.getElementById('gpBalance');
   var potentialResultEl = document.getElementById('potentialResult');
   var dailyBonusBtn = document.getElementById('dailyBonusBtn');
-  var recentPillsEl = document.getElementById('recentRoundsPills');
 
   var dpr = window.devicePixelRatio || 1;
   var latest = null;
@@ -33,8 +32,11 @@
   var consecutiveFailures = 0;
   var pollTimer = null;
 
+  // B$ (Billions Store Currency) formatter - matches the gp() PHP helper's
+  // "B$" prefix so the client never renders an amount that looks different
+  // from what the server/admin panel shows.
   function fmtGp(n) {
-    return Number(n).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    return 'B$' + Number(n).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   }
 
   function postJson(url, body) {
@@ -67,13 +69,47 @@
     if (!latest) return 1;
     if (latest.status === 'running' && roundStartMs !== null) {
       var elapsed = Math.max(0, (serverNowMs() - roundStartMs) / 1000);
-      var rate = parseFloat(latest.settings.growth_rate) || 0.12;
+      var rate = parseFloat(latest.settings.growth_rate) || 0.07;
       return Math.exp(rate * elapsed);
     }
     if (latest.status === 'crashed' || latest.status === 'completed') {
       return parseFloat(latest.crash_multiplier || 1);
     }
     return 1;
+  }
+
+  // Fixed vertical scale (not recomputed from the live multiplier every
+  // frame like the old version) - the crash range is a tight, known band
+  // (1.30x-2.00x by default), so a stable ceiling with a little headroom
+  // keeps the curve readable without ever rescaling/jittering mid-round.
+  var DISPLAY_CEILING = 2.3;
+  // The plane's horizontal screen position is CONSTANT - always exactly
+  // centered. The trajectory is drawn relative to that fixed point instead
+  // of stretching to fit the whole elapsed time into the canvas width (the
+  // old approach), so the plane can never drift toward an edge or off
+  // canvas: the graph scrolls left underneath a plane that never moves
+  // horizontally, only rising/falling vertically with the multiplier.
+  var SCROLL_PX_PER_SEC = 42;
+
+  function drawPlane(x, y, angle, crashedNow) {
+    var size = 15 * dpr;
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.rotate(angle);
+    ctx.shadowColor = crashedNow ? '#ff5d7a' : '#ffb066';
+    ctx.shadowBlur = 18 * dpr;
+    ctx.fillStyle = crashedNow ? '#ff5d7a' : '#ff8a3d';
+    ctx.strokeStyle = 'rgba(255,255,255,0.9)';
+    ctx.lineWidth = 1.2 * dpr;
+    ctx.beginPath();
+    ctx.moveTo(size, 0);
+    ctx.lineTo(-size * 0.55, size * 0.42);
+    ctx.lineTo(-size * 0.16, 0);
+    ctx.lineTo(-size * 0.55, -size * 0.42);
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+    ctx.restore();
   }
 
   function draw(mult) {
@@ -83,85 +119,88 @@
     ctx.strokeStyle = 'rgba(255,255,255,0.05)';
     ctx.lineWidth = 1;
     for (var i = 1; i < 5; i++) {
-      var y = h - (h * i / 5);
-      ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke();
+      var gy = h - (h * i / 5);
+      ctx.beginPath(); ctx.moveTo(0, gy); ctx.lineTo(w, gy); ctx.stroke();
     }
-
-    if (history.length < 2) return;
 
     var pad = 22 * dpr;
-    var tMax = Math.max(history[history.length - 1].t, 1);
-    var mMax = Math.max(mult * 1.06, 1.3);
-    var logMax = Math.log(mMax);
+    var planeX = w * 0.5;
+    var pxPerSec = SCROLL_PX_PER_SEC * dpr;
+    var crashedNow = stage.classList.contains('crashed');
 
-    function xFor(t) { return pad + (t / tMax) * (w - pad * 1.6); }
-    function yFor(m) { return h - pad - (Math.log(Math.max(m, 1)) / logMax) * (h - pad * 1.8); }
-
-    var pts = [];
-    for (var n = 0; n < history.length; n++) pts.push([xFor(history[n].t), yFor(history[n].m)]);
-
-    // Smooth the polyline into a genuine curve (quadratic through midpoints)
-    // instead of a jagged straight-segment path - this is what makes the
-    // trajectory read as a rising slope rather than a staircase.
-    function tracePath() {
-      ctx.beginPath();
-      ctx.moveTo(pts[0][0], pts[0][1]);
-      for (var i = 1; i < pts.length - 1; i++) {
-        var mx = (pts[i][0] + pts[i + 1][0]) / 2;
-        var my = (pts[i][1] + pts[i + 1][1]) / 2;
-        ctx.quadraticCurveTo(pts[i][0], pts[i][1], mx, my);
-      }
-      var lastPt = pts[pts.length - 1];
-      ctx.lineTo(lastPt[0], lastPt[1]);
+    function yFor(m) {
+      var clamped = Math.min(Math.max(m, 1), DISPLAY_CEILING);
+      return h - pad - ((clamped - 1) / (DISPLAY_CEILING - 1)) * (h - pad * 1.8);
     }
 
-    var crashedNow = stage.classList.contains('crashed');
-    var lineColor = crashedNow ? '#ff5d7a' : '#ff8a3d';
+    var curT = history.length ? history[history.length - 1].t : 0;
+    function xFor(t) { return planeX - (curT - t) * pxPerSec; }
 
-    var grad = ctx.createLinearGradient(0, 0, 0, h);
-    grad.addColorStop(0, crashedNow ? 'rgba(255,93,122,0.34)' : 'rgba(255,138,61,0.36)');
-    grad.addColorStop(0.55, crashedNow ? 'rgba(255,93,122,0.12)' : 'rgba(255,138,61,0.12)');
-    grad.addColorStop(1, 'rgba(255,138,61,0)');
+    if (history.length >= 2) {
+      var pts = [];
+      for (var n = 0; n < history.length; n++) pts.push([xFor(history[n].t), yFor(history[n].m)]);
 
-    tracePath();
-    ctx.lineTo(pts[pts.length - 1][0], h);
-    ctx.lineTo(pts[0][0], h);
-    ctx.closePath();
-    ctx.fillStyle = grad;
-    ctx.fill();
+      // Smooth the polyline into a genuine curve (quadratic through
+      // midpoints) instead of a jagged straight-segment path.
+      function tracePath() {
+        ctx.beginPath();
+        ctx.moveTo(pts[0][0], pts[0][1]);
+        for (var p = 1; p < pts.length - 1; p++) {
+          var mx = (pts[p][0] + pts[p + 1][0]) / 2;
+          var my = (pts[p][1] + pts[p + 1][1]) / 2;
+          ctx.quadraticCurveTo(pts[p][0], pts[p][1], mx, my);
+        }
+        var lastPt = pts[pts.length - 1];
+        ctx.lineTo(lastPt[0], lastPt[1]);
+      }
 
-    tracePath();
-    ctx.strokeStyle = lineColor;
-    ctx.lineWidth = 3.5 * dpr;
-    ctx.shadowColor = lineColor;
-    ctx.shadowBlur = 16 * dpr;
-    ctx.lineJoin = 'round';
-    ctx.lineCap = 'round';
-    ctx.stroke();
-    ctx.shadowBlur = 0;
+      var lineColor = crashedNow ? '#ff5d7a' : '#ff8a3d';
+      var grad = ctx.createLinearGradient(0, 0, 0, h);
+      grad.addColorStop(0, crashedNow ? 'rgba(255,93,122,0.34)' : 'rgba(255,138,61,0.36)');
+      grad.addColorStop(0.55, crashedNow ? 'rgba(255,93,122,0.12)' : 'rgba(255,138,61,0.12)');
+      grad.addColorStop(1, 'rgba(255,138,61,0)');
 
-    var last = history[history.length - 1];
-    var prevIdx = Math.max(0, history.length - 10);
-    var prev = history[prevIdx];
-    var lx = xFor(last.t), ly = yFor(last.m);
-    var pxr = xFor(prev.t), pyr = yFor(prev.m);
-    var angle = Math.atan2(ly - pyr, lx - pxr);
+      tracePath();
+      ctx.lineTo(pts[pts.length - 1][0], h);
+      ctx.lineTo(pts[0][0], h);
+      ctx.closePath();
+      ctx.fillStyle = grad;
+      ctx.fill();
+
+      tracePath();
+      ctx.strokeStyle = lineColor;
+      ctx.lineWidth = 3.5 * dpr;
+      ctx.shadowColor = lineColor;
+      ctx.shadowBlur = 16 * dpr;
+      ctx.lineJoin = 'round';
+      ctx.lineCap = 'round';
+      ctx.stroke();
+      ctx.shadowBlur = 0;
+    }
+
+    // The plane itself is drawn unconditionally, every frame, at the fixed
+    // center point - this is what guarantees it's always visible, even
+    // before any history exists (round just started, or still waiting).
+    var planeY = yFor(mult);
+    var angle = 0;
+    if (history.length >= 2) {
+      var prevIdx = Math.max(0, history.length - 10);
+      var prev = history[prevIdx];
+      var last = history[history.length - 1];
+      var lx = xFor(last.t), ly = yFor(last.m);
+      var pxr = xFor(prev.t), pyr = yFor(prev.m);
+      angle = Math.atan2(ly - pyr, lx - pxr);
+    }
 
     if (latest && latest.status === 'running' && Math.random() < 0.55) {
-      spawnSpark(lx + (Math.random() - 0.5) * 5 * dpr, ly + (Math.random() - 0.5) * 5 * dpr);
+      var trailAngle = angle + Math.PI;
+      spawnSpark(
+        planeX + Math.cos(trailAngle) * 10 * dpr + (Math.random() - 0.5) * 4 * dpr,
+        planeY + Math.sin(trailAngle) * 10 * dpr + (Math.random() - 0.5) * 4 * dpr
+      );
     }
-    drawSparks(lx, ly, dpr, crashedNow);
-
-    ctx.save();
-    ctx.translate(lx, ly);
-    ctx.rotate(angle);
-    ctx.font = (30 * dpr) + 'px sans-serif';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.shadowColor = crashedNow ? '#ff5d7a' : '#ffb066';
-    ctx.shadowBlur = 22 * dpr;
-    ctx.fillText('✈️', 0, 0);
-    ctx.restore();
+    drawSparks(crashedNow);
+    drawPlane(planeX, planeY, angle, crashedNow);
   }
 
   var sparks = [];
@@ -169,7 +208,7 @@
     sparks.push({ x: x, y: y, life: 1, r: (2 + Math.random() * 2) * dpr });
     if (sparks.length > 40) sparks.shift();
   }
-  function drawSparks(planeX, planeY, dprLocal, crashedNow) {
+  function drawSparks(crashedNow) {
     for (var i = sparks.length - 1; i >= 0; i--) {
       var s = sparks[i];
       s.life -= 0.035;
@@ -255,7 +294,7 @@
         roundResultEl.style.display = 'block';
         if (data.my_bet.status === 'cashed_out') {
           roundResultEl.style.color = 'var(--emerald)';
-          roundResultEl.textContent = 'CLAIMED AT ' + parseFloat(data.my_bet.cashout_multiplier).toFixed(2) + 'x · +' + fmtGp(data.my_bet.payout) + ' GP';
+          roundResultEl.textContent = 'CLAIMED AT ' + parseFloat(data.my_bet.cashout_multiplier).toFixed(2) + 'x · +' + fmtGp(data.my_bet.payout);
         } else if (data.my_bet.status === 'lost') {
           roundResultEl.style.color = 'var(--danger)';
           roundResultEl.textContent = 'YOU LOST THIS ROUND';
@@ -280,7 +319,7 @@
     var wasRunning = latest && latest.status === 'running';
     latest = data;
 
-    if (balanceEl) balanceEl.textContent = fmtGp(data.balance) + ' GP';
+    if (balanceEl) balanceEl.textContent = fmtGp(data.balance);
 
     if (roundChanged) {
       resetRoundUi();
@@ -322,7 +361,7 @@
     var max = parseFloat(window.FLIGHT_SETTINGS.maximum_entry);
     var val = parseFloat(stake);
     if (isNaN(val) || val < min || val > max) {
-      window.toast && window.toast('Entry must be between ' + min + ' and ' + max + ' GP', 'error');
+      window.toast && window.toast('Entry must be between B$' + min + ' and B$' + max, 'error');
       return;
     }
     joining = true;
@@ -335,10 +374,10 @@
         return;
       }
       window.__flightMyStake = parseFloat(data.stake);
-      if (balanceEl) balanceEl.textContent = fmtGp(data.balance) + ' GP';
+      if (balanceEl) balanceEl.textContent = fmtGp(data.balance);
       entryRow.style.display = 'none';
       waitingMsg.style.display = 'block';
-      window.toast && window.toast('Joined with ' + data.stake + ' GP');
+      window.toast && window.toast('Joined with ' + fmtGp(data.stake));
     }).catch(function () {
       joining = false;
       joinBtn.disabled = false;
@@ -359,8 +398,8 @@
       }
       claimBtn.classList.add('claimed');
       claimBtn.innerHTML = 'CLAIMED ✓';
-      if (balanceEl) balanceEl.textContent = fmtGp(data.balance) + ' GP';
-      window.toast && window.toast('Claimed at ' + parseFloat(data.multiplier).toFixed(2) + 'x · +' + fmtGp(data.payout) + ' GP');
+      if (balanceEl) balanceEl.textContent = fmtGp(data.balance);
+      window.toast && window.toast('Claimed at ' + parseFloat(data.multiplier).toFixed(2) + 'x · +' + fmtGp(data.payout));
     }).catch(function () {
       claiming = false;
       claimBtn.disabled = false;
@@ -371,7 +410,7 @@
   if (stakeInput && potentialResultEl) {
     stakeInput.addEventListener('input', function () {
       var v = parseFloat(stakeInput.value) || 0;
-      potentialResultEl.textContent = 'Potential result: ' + fmtGp(v) + ' GP × current multiplier';
+      potentialResultEl.textContent = 'Potential result: ' + fmtGp(v) + ' × current multiplier';
     });
   }
 
@@ -384,8 +423,8 @@
           dailyBonusBtn.disabled = false;
           return;
         }
-        if (balanceEl) balanceEl.textContent = fmtGp(data.resulting_balance) + ' GP';
-        window.toast && window.toast('+' + fmtGp(data.amount) + ' GP daily bonus claimed!');
+        if (balanceEl) balanceEl.textContent = fmtGp(data.resulting_balance);
+        window.toast && window.toast('+' + fmtGp(data.amount) + ' daily bonus claimed!');
         dailyBonusBtn.style.display = 'none';
       }).catch(function () {
         dailyBonusBtn.disabled = false;

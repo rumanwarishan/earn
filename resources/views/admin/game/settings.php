@@ -9,8 +9,8 @@
   <label class="flex items-center gap-2 mb-3"><input type="checkbox" name="maintenance_mode" <?= !empty($settings['maintenance_mode']) ? 'checked' : '' ?>> Maintenance mode (hides entry, existing rounds still resolve)</label>
 
   <h3 class="mb-3 mt-4" style="font-size:14px;">Entry limits</h3>
-  <div class="field"><label>Minimum entry (GP)</label><input class="input" type="text" name="minimum_entry" value="<?= e((string) $settings['minimum_entry']) ?>"></div>
-  <div class="field"><label>Maximum entry (GP)</label><input class="input" type="text" name="maximum_entry" value="<?= e((string) $settings['maximum_entry']) ?>"></div>
+  <div class="field"><label>Minimum entry (B$)</label><input class="input" type="text" name="minimum_entry" value="<?= e((string) $settings['minimum_entry']) ?>"></div>
+  <div class="field"><label>Maximum entry (B$)</label><input class="input" type="text" name="maximum_entry" value="<?= e((string) $settings['maximum_entry']) ?>"></div>
 
   <h3 class="mb-3 mt-4" style="font-size:14px;">Round pacing</h3>
   <div class="field"><label>Countdown seconds</label><input class="input" type="text" name="countdown_seconds" value="<?= e((string) $settings['countdown_seconds']) ?>"></div>
@@ -18,10 +18,19 @@
   <div class="field"><label>Growth rate</label><input class="input" type="text" name="growth_rate" value="<?= e((string) $settings['growth_rate']) ?>"><div class="field-hint">Higher = multiplier rises faster. Multiplier = e^(rate &times; seconds).</div></div>
 
   <h3 class="mb-3 mt-4" style="font-size:14px;">New players &amp; daily bonus</h3>
-  <div class="field"><label>Starting Game Points balance</label><input class="input" type="text" name="starting_balance" value="<?= e((string) $settings['starting_balance']) ?>"></div>
-  <label class="flex items-center gap-2 mb-3"><input type="checkbox" name="daily_bonus_enabled" <?= !empty($settings['daily_bonus_enabled']) ? 'checked' : '' ?>> Daily free Game Points bonus enabled</label>
-  <div class="field"><label>Daily bonus amount (GP)</label><input class="input" type="text" name="daily_bonus_amount" value="<?= e((string) $settings['daily_bonus_amount']) ?>"></div>
+  <div class="field"><label>Starting B$ balance</label><input class="input" type="text" name="starting_balance" value="<?= e((string) $settings['starting_balance']) ?>"></div>
+  <label class="flex items-center gap-2 mb-3"><input type="checkbox" name="daily_bonus_enabled" <?= !empty($settings['daily_bonus_enabled']) ? 'checked' : '' ?>> Daily free B$ bonus enabled</label>
+  <div class="field"><label>Daily bonus amount (B$)</label><input class="input" type="text" name="daily_bonus_amount" value="<?= e((string) $settings['daily_bonus_amount']) ?>"></div>
   <div class="field"><label>Maximum daily bonus claims per day</label><input class="input" type="text" name="daily_bonus_max_per_day" value="<?= e((string) $settings['daily_bonus_max_per_day']) ?>"></div>
+
+  <h3 class="mb-3 mt-4" style="font-size:14px;">Exchange to wallet</h3>
+  <div class="glass-panel mb-3" style="padding:12px 14px;font-size:12px;color:var(--text-mid);">
+    This is the one path where B$ becomes real wallet balance. Set the rate and limits carefully - a user can win B$ from the crash game and exchange it here for real spendable/withdrawable money.
+  </div>
+  <label class="flex items-center gap-2 mb-3"><input type="checkbox" name="exchange_enabled" <?= !empty($settings['exchange_enabled']) ? 'checked' : '' ?>> Exchanging B$ to wallet enabled</label>
+  <div class="field"><label>Exchange rate (USD per 1 B$)</label><input class="input" type="text" name="exchange_rate" value="<?= e((string) $settings['exchange_rate']) ?>"></div>
+  <div class="field"><label>Minimum exchange amount (B$)</label><input class="input" type="text" name="min_exchange_amount" value="<?= e((string) $settings['min_exchange_amount']) ?>"></div>
+  <div class="field"><label>Maximum B$ exchanged per user per day</label><input class="input" type="text" name="max_exchange_per_day" value="<?= e((string) $settings['max_exchange_per_day']) ?>"></div>
 
   <button class="btn btn-primary" type="submit">Save settings</button>
 </form>

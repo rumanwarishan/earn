@@ -48,7 +48,7 @@ final class GameController
         $stake = trim((string) $request->input('stake', ''));
 
         if (!preg_match('/^\d+(\.\d{1,2})?$/', $stake)) {
-            Response::json(['ok' => false, 'error' => 'Enter a valid Game Points amount.'], 422);
+            Response::json(['ok' => false, 'error' => 'Enter a valid B$ amount.'], 422);
             return;
         }
 
@@ -82,6 +82,27 @@ final class GameController
         } catch (RuntimeException $e) {
             Response::json(['ok' => false, 'error' => $e->getMessage()], 422);
         }
+    }
+
+    public function exchange(Request $request): void
+    {
+        $user = Session::get('user');
+        $amount = trim((string) $request->input('amount', ''));
+
+        if (!preg_match('/^\d+(\.\d{1,2})?$/', $amount) || bccomp($amount, '0', 2) <= 0) {
+            flash_errors(['amount' => 'Enter a valid B$ amount to exchange.']);
+            redirect('/game');
+            return;
+        }
+
+        try {
+            $result = GamePointService::exchangeToWallet((int) $user['id'], $amount, $request->ip());
+            flash_success('Exchanged B$' . number_format((float) $result['bs_exchanged'], 2) . ' for ' . money($result['usd_credited']) . ' in your wallet.');
+        } catch (\Throwable $e) {
+            flash_errors(['amount' => $e->getMessage()]);
+        }
+
+        redirect('/game');
     }
 
     public function history(Request $request): void

@@ -49,9 +49,9 @@ final class ChatbotService
                 'quick_replies' => ['How does cashback work?', 'Referral program'],
             ];
         }
-        if (self::any($text, ['flight', 'billions flight', 'crash game', 'game points', ' gp ', 'game point'])) {
+        if (self::any($text, ['flight', 'billions flight', 'crash game', 'b$', 'billions currency'])) {
             return [
-                'reply' => "Billions Flight is a fun crash-style mini-game paid entirely in virtual Game Points (GP). GP are for entertainment only - they have no cash value and can NEVER be withdrawn, deposited, transferred, or converted to USD/BTC/USDT. Your real financial wallet is completely separate and is never touched by the game. Play it any time from the Game tab.",
+                'reply' => "Billions Flight is a crash-style mini-game played with B\$ (Billions Store Currency). Joining a round, winning, and losing all happen in B\$ only - your financial wallet is never touched by gameplay. When you want, use \"Exchange B\$ to wallet\" on the Game page to convert your B\$ balance into real wallet balance at the current rate. Play any time from the Game tab.",
                 'quick_replies' => self::defaultQuickReplies(),
             ];
         }

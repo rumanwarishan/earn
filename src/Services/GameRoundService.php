@@ -20,8 +20,8 @@ use RuntimeException;
  */
 final class GameRoundService
 {
-    private const MIN_MULTIPLIER = 1.00;
-    private const MAX_MULTIPLIER = 5.00;
+    private const MIN_MULTIPLIER = 1.30;
+    private const MAX_MULTIPLIER = 2.00;
 
     /** Public, client-safe snapshot of the current round + this user's bet in it. */
     public static function currentState(int $userId): array
@@ -135,9 +135,12 @@ final class GameRoundService
      */
     private static function generateCrashMultiplier(): string
     {
+        // Range is already tight (1.30x-2.00x by default), so a plain
+        // uniform draw is used rather than the wider range's low-end skew -
+        // skewing a band this narrow would make it crash near the floor
+        // almost every round.
         $r = random_int(0, 1_000_000) / 1_000_000; // uniform in [0, 1]
-        $skewed = $r ** 2;
-        $crash = self::MIN_MULTIPLIER + ($skewed * (self::MAX_MULTIPLIER - self::MIN_MULTIPLIER));
+        $crash = self::MIN_MULTIPLIER + ($r * (self::MAX_MULTIPLIER - self::MIN_MULTIPLIER));
         $crash = floor($crash * 100) / 100;
         $crash = max(self::MIN_MULTIPLIER, min($crash, self::MAX_MULTIPLIER));
 
@@ -206,7 +209,7 @@ final class GameRoundService
             throw new RuntimeException('Billions Flight is currently unavailable.');
         }
         if (bccomp($stake, $settings['minimum_entry'], 2) < 0 || bccomp($stake, $settings['maximum_entry'], 2) > 0) {
-            throw new RuntimeException("Entry must be between {$settings['minimum_entry']} and {$settings['maximum_entry']} GP.");
+            throw new RuntimeException("Entry must be between B\${$settings['minimum_entry']} and B\${$settings['maximum_entry']}.");
         }
 
         return Database::transaction(function (PDO $pdo) use ($userId, $stake, $ip, $settings) {

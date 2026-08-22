@@ -97,12 +97,13 @@ $router->group('', [SecurityHeaders::class, MaintenanceMode::class], function (R
 
         $router->post('/shop/{id}/buy', [PurchaseController::class, 'buy'], [VerifyCsrfToken::class]);
 
-        // ---- Billions Flight (virtual Game Points only - see GameRoundService) ----
+        // ---- Billions Flight (B$ crash game - see GameRoundService/GamePointService) ----
         $router->get('/game', [GameController::class, 'index']);
         $router->get('/game/state', [GameController::class, 'state']);
         $router->post('/game/round/join', [GameController::class, 'join'], [VerifyCsrfToken::class]);
         $router->post('/game/round/{uuid}/cashout', [GameController::class, 'cashout'], [VerifyCsrfToken::class]);
         $router->post('/game/daily-bonus', [GameController::class, 'dailyBonus'], [VerifyCsrfToken::class]);
+        $router->post('/game/exchange', [GameController::class, 'exchange'], [VerifyCsrfToken::class]);
         $router->get('/game/history', [GameController::class, 'history']);
         $router->get('/game/round-history', [GameController::class, 'roundHistory']);
     });

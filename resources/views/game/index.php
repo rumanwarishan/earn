@@ -1,8 +1,8 @@
 <div class="flight-top flex items-center justify-between mb-3">
   <div>
-    <div class="text-muted" style="font-size:12px;">Virtual Game Points</div>
+    <div class="text-muted" style="font-size:12px;">B$ Balance</div>
     <div class="flight-gp-balance" id="gpBalance"><?= gp($balance) ?></div>
-    <span class="badge badge-emerald mt-1" style="display:inline-block;">FUN GAME &middot; NOT REAL MONEY</span>
+    <span class="badge badge-emerald mt-1" style="display:inline-block;">REDEEMABLE FOR USD</span>
   </div>
   <div style="text-align:right;">
     <button class="btn btn-secondary btn-sm" type="button" id="dailyBonusBtn"<?= $settings['daily_bonus_enabled'] ? '' : ' style="display:none;"' ?>>Daily Bonus</button>
@@ -26,7 +26,7 @@
 <div class="glass-card flight-controls mt-3" style="padding:18px;">
   <div id="entryRow">
     <div class="field" style="margin-bottom:10px;">
-      <label>Entry (GP)</label>
+      <label>Entry (B$)</label>
       <input class="input" type="number" id="stakeInput" step="0.01"
              min="<?= e((string) $settings['minimum_entry']) ?>" max="<?= e((string) $settings['maximum_entry']) ?>"
              value="<?= e((string) $settings['minimum_entry']) ?>">
@@ -37,7 +37,7 @@
   </div>
 
   <button class="btn btn-primary w-full flight-claim-btn" type="button" id="claimBtn" style="display:none;">
-    CLAIM <span id="claimAmount">0.00</span> GP
+    CLAIM <span id="claimAmount">B$0.00</span>
   </button>
 
   <div id="waitingMsg" class="text-muted text-center" style="display:none;font-size:13px;padding:8px 0;">You're in! Waiting for takeoff&hellip;</div>
@@ -45,6 +45,22 @@
   <div id="roundResult" class="text-center" style="display:none;padding:8px 0;font-weight:700;"></div>
   <div id="connectionMsg" class="alert alert-error mt-2" style="display:none;">Connection interrupted. Reconnecting&hellip;</div>
 </div>
+
+<div class="section-head"><h3>Exchange B$ to wallet</h3></div>
+<form method="POST" action="/game/exchange" class="glass-card mb-3" style="padding:18px;">
+  <?= csrf_field() ?>
+  <div class="field">
+    <label>Amount (B$)</label>
+    <input class="input" type="text" name="amount" placeholder="<?= e((string) $settings['min_exchange_amount']) ?>" inputmode="decimal">
+    <div class="field-hint">
+      Rate: B$1 = <?= money(bcmul('1', (string) $settings['exchange_rate'], 4)) ?> &middot;
+      Min <?= gp($settings['min_exchange_amount']) ?> &middot;
+      Daily limit <?= gp($settings['max_exchange_per_day']) ?>
+    </div>
+  </div>
+  <button class="btn btn-secondary w-full" type="submit"<?= $settings['exchange_enabled'] ? '' : ' disabled' ?>>Exchange to wallet balance</button>
+  <?php if (!$settings['exchange_enabled']): ?><div class="text-muted mt-2" style="font-size:11.5px;">Exchanging is temporarily disabled.</div><?php endif; ?>
+</form>
 
 <div class="section-head"><h3>Recent flights</h3></div>
 <div class="flight-history-pills mb-3" id="recentRoundsPills">
@@ -76,7 +92,7 @@
 </div>
 
 <div class="glass-panel mb-3" style="padding:14px;font-size:12px;color:var(--text-mid);">
-  Game Points (GP) are virtual and used only inside Billions Flight for entertainment. They have no cash value and cannot be deposited, withdrawn, transferred, or converted to USD/BTC/USDT. Your financial wallet is never affected by this game.
+  B$ is Billions Flight's in-game currency. Play with B$ as much as you like - your financial wallet is never touched by joining, winning, or losing a round. When you're ready, use "Exchange B$ to wallet" above to convert your B$ balance into real wallet balance at the current rate, subject to the minimum amount and daily limit shown.
 </div>
 
 <script>window.FLIGHT_SETTINGS = <?= json_encode(['minimum_entry' => $settings['minimum_entry'], 'maximum_entry' => $settings['maximum_entry']]) ?>;</script>

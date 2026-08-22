@@ -29,7 +29,9 @@ final class GamePointServiceTest extends TestCase
         GameSettingsService::current($pdo); // lazily creates the row on the very first test
         $pdo->exec("UPDATE game_settings SET enabled = 1, maintenance_mode = 0, minimum_entry = 5.00, maximum_entry = 80.00,
             countdown_seconds = 5, round_grace_seconds = 3, growth_rate = 0.1200, starting_balance = 1000.00,
-            daily_bonus_enabled = 1, daily_bonus_amount = 100.00, daily_bonus_max_per_day = 1 WHERE id = 1");
+            daily_bonus_enabled = 1, daily_bonus_amount = 100.00, daily_bonus_max_per_day = 1,
+            exchange_enabled = 1, exchange_rate = 0.010000, min_exchange_amount = 100.00, max_exchange_per_day = 2000.00
+            WHERE id = 1");
     }
 
     public function test_wallet_auto_creates_with_configured_starting_balance(): void
@@ -126,5 +128,79 @@ final class GamePointServiceTest extends TestCase
         $stmt = $pdo->prepare('SELECT COUNT(*) FROM wallet_ledger WHERE user_id = ?');
         $stmt->execute([$user['id']]);
         $this->assertSame(0, (int) $stmt->fetchColumn(), 'No financial wallet_ledger row should exist for a user who only played the game');
+    }
+
+    public function test_exchange_debits_bs_and_credits_wallet_atomically_at_configured_rate(): void
+    {
+        $pdo = Database::connection();
+        $user = TestSeed::createUser('gp-exchange');
+        GamePointService::getOrCreateWallet((int) $user['id'], $pdo); // 1000.00 B$ starting balance
+
+        $walletBefore = WalletService::getOrCreateWallet((int) $user['id'], $pdo);
+
+        $result = GamePointService::exchangeToWallet((int) $user['id'], '200.00', '127.0.0.1');
+
+        $this->assertSame('200.00', $result['bs_exchanged']);
+        $this->assertSame('2.00', $result['usd_credited']); // 200 * 0.01 rate
+        $this->assertSame('800.00', $result['bs_balance']);
+        $this->assertSame(GamePointService::balance((int) $user['id']), $result['bs_balance']);
+
+        $walletAfter = WalletService::getOrCreateWallet((int) $user['id'], $pdo);
+        $this->assertSame(bcadd($walletBefore['referral_balance'], '2.00', 2), $walletAfter['referral_balance']);
+
+        $stmt = $pdo->prepare("SELECT COUNT(*) FROM wallet_ledger WHERE user_id = ? AND type = 'game_exchange' AND amount = '2.00'");
+        $stmt->execute([$user['id']]);
+        $this->assertSame(1, (int) $stmt->fetchColumn());
+    }
+
+    public function test_exchange_disabled_is_rejected(): void
+    {
+        Database::connection()->exec('UPDATE game_settings SET exchange_enabled = 0 WHERE id = 1');
+        $user = TestSeed::createUser('gp-exchange-off');
+        GamePointService::getOrCreateWallet((int) $user['id'], Database::connection());
+
+        $this->expectException(RuntimeException::class);
+        GamePointService::exchangeToWallet((int) $user['id'], '200.00', '127.0.0.1');
+    }
+
+    public function test_exchange_below_minimum_is_rejected(): void
+    {
+        $user = TestSeed::createUser('gp-exchange-min');
+        GamePointService::getOrCreateWallet((int) $user['id'], Database::connection());
+
+        $this->expectException(RuntimeException::class);
+        GamePointService::exchangeToWallet((int) $user['id'], '10.00', '127.0.0.1'); // below the 100.00 minimum
+    }
+
+    public function test_exchange_beyond_bs_balance_is_rejected_and_wallet_untouched(): void
+    {
+        $pdo = Database::connection();
+        $user = TestSeed::createUser('gp-exchange-overdraw');
+        GamePointService::getOrCreateWallet((int) $user['id'], $pdo); // 1000.00 B$
+
+        $walletBefore = WalletService::getOrCreateWallet((int) $user['id'], $pdo);
+
+        try {
+            GamePointService::exchangeToWallet((int) $user['id'], '5000.00', '127.0.0.1');
+            $this->fail('Expected an exception for exchanging more B$ than the balance holds');
+        } catch (\Throwable $e) {
+            // expected - fall through to assert nothing was credited
+        }
+
+        $walletAfter = WalletService::getOrCreateWallet((int) $user['id'], $pdo);
+        $this->assertSame($walletBefore['referral_balance'], $walletAfter['referral_balance'], 'A failed exchange must not credit the wallet');
+    }
+
+    public function test_exchange_daily_cap_is_enforced(): void
+    {
+        $pdo = Database::connection();
+        $pdo->exec('UPDATE game_settings SET starting_balance = 5000.00, max_exchange_per_day = 300.00, min_exchange_amount = 50.00 WHERE id = 1');
+        $user = TestSeed::createUser('gp-exchange-cap');
+        GamePointService::getOrCreateWallet((int) $user['id'], $pdo);
+
+        GamePointService::exchangeToWallet((int) $user['id'], '250.00', '127.0.0.1');
+
+        $this->expectException(RuntimeException::class);
+        GamePointService::exchangeToWallet((int) $user['id'], '100.00', '127.0.0.1'); // 250 + 100 > 300 daily cap
     }
 }

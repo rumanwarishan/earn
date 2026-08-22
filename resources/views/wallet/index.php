@@ -16,6 +16,16 @@
   </div>
 </div>
 
+<div class="glass-card mb-3" style="padding:16px 20px;">
+  <div class="flex items-center justify-between">
+    <div>
+      <div class="text-muted" style="font-size:11.5px;">Billions Flight B$ balance</div>
+      <div style="font-size:18px;font-weight:750;"><?= gp($bsBalance) ?></div>
+    </div>
+    <a class="btn btn-secondary btn-sm" href="/game">Exchange to wallet</a>
+  </div>
+</div>
+
 <div class="tabs mb-3">
   <?php foreach (['all'=>'All','deposits'=>'Deposits','cashback'=>'Cashback','referral'=>'Referral','withdrawals'=>'Withdrawals'] as $key => $label): ?>
     <a class="tab <?= $tab === $key ? 'active' : '' ?>" href="/wallet?tab=<?= $key ?>"><?= $label ?></a>

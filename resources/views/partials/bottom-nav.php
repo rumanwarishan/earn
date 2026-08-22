@@ -9,13 +9,9 @@
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 8h12l-1 12H7L6 8z"/><path d="M9 8a3 3 0 016 0"/></svg>
       Shop
     </a>
-    <a class="nav-item <?= navActive('/referral', $current) ?>" href="/referral">
+    <a class="nav-item <?= (navActive('/referral', $current) || navActive('/tasks', $current)) ? 'active' : '' ?>" href="/referral">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="3"/><path d="M5 21c0-4 3-6 7-6s7 2 7 6"/></svg>
       Rewards
-    </a>
-    <a class="nav-item <?= navActive('/tasks', $current) ?>" href="/tasks">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="7" width="16" height="13" rx="2"/><path d="M8 7V5a4 4 0 018 0v2"/></svg>
-      Tasks
     </a>
     <a class="nav-item <?= navActive('/watch-and-earn', $current) ?>" href="/watch-and-earn">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2.5" y="5" width="19" height="13" rx="2.5"/><path d="M10 9.5l4.5 2.5-4.5 2.5v-5z" fill="currentColor" stroke="none"/></svg>

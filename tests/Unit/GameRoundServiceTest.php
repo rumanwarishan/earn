@@ -32,7 +32,9 @@ final class GameRoundServiceTest extends TestCase
         GameSettingsService::current($pdo); // lazily creates the row on the very first test
         $pdo->exec("UPDATE game_settings SET enabled = 1, maintenance_mode = 0, minimum_entry = 5.00, maximum_entry = 80.00,
             countdown_seconds = 5, round_grace_seconds = 3, growth_rate = 0.1200, starting_balance = 1000.00,
-            daily_bonus_enabled = 1, daily_bonus_amount = 100.00, daily_bonus_max_per_day = 1 WHERE id = 1");
+            daily_bonus_enabled = 1, daily_bonus_amount = 100.00, daily_bonus_max_per_day = 1,
+            exchange_enabled = 1, exchange_rate = 0.010000, min_exchange_amount = 100.00, max_exchange_per_day = 2000.00
+            WHERE id = 1");
         $pdo->exec('DELETE FROM game_rounds');
     }
 
@@ -173,6 +175,13 @@ final class GameRoundServiceTest extends TestCase
     {
         $pdo = Database::connection();
         $this->fastSettings($pdo, '6.0000'); // fast, near-certain crash
+        // fastSettings() defaults round_grace_seconds to 1s - too short for a
+        // fixed sleep() to reliably land while still 'crashed' (a slow test
+        // runner can let the round finish its grace window AND cycle a
+        // second round's own 1s countdown before the check, landing on
+        // 'waiting' instead). Widen the grace window for this test only so
+        // the assertion has a much bigger, deterministic target to hit.
+        $pdo->exec('UPDATE game_settings SET round_grace_seconds = 30 WHERE id = 1');
         $user = TestSeed::createUser('round-cashout-after-crash');
 
         $bet = GameRoundService::placeBet((int) $user['id'], '20.00', '127.0.0.1');
