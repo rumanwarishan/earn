@@ -16,12 +16,15 @@
     <tbody>
       <?php if (!$ads): ?><tr><td colspan="9" class="text-muted">No advertisements yet.</td></tr><?php endif; ?>
       <?php foreach ($ads as $a): ?>
+        <?php $videoId = $a['type'] === 'video' && !empty($a['destination_url']) ? youtube_video_id((string) $a['destination_url']) : null; ?>
         <tr>
           <td>
             <?php if (!empty($a['image_path'])): ?>
               <img class="admin-thumb" src="<?= e($a['image_path']) ?>" alt="" loading="lazy" onerror="this.outerHTML='<span class=&quot;admin-thumb admin-thumb-missing&quot; title=&quot;File missing on server&quot;>⚠</span>';">
+            <?php elseif ($videoId !== null): ?>
+              <img class="admin-thumb" src="<?= e(youtube_thumbnail_url($videoId)) ?>" alt="" loading="lazy" onerror="this.outerHTML='<span class=&quot;admin-thumb admin-thumb-missing&quot; title=&quot;YouTube thumbnail unavailable&quot;>⚠</span>';">
             <?php elseif ($a['type'] === 'video' && !empty($a['destination_url'])): ?>
-              <img class="admin-thumb" src="https://img.youtube.com/vi/<?= e($a['destination_url']) ?>/default.jpg" alt="" loading="lazy" onerror="this.outerHTML='<span class=&quot;admin-thumb admin-thumb-missing&quot; title=&quot;YouTube thumbnail unavailable&quot;>⚠</span>';">
+              <span class="admin-thumb admin-thumb-missing" title="Couldn't extract a video ID from this URL - edit and re-save it">⚠</span>
             <?php else: ?>
               <span class="admin-thumb-empty" title="No image uploaded">—</span>
             <?php endif; ?>

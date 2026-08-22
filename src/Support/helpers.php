@@ -196,6 +196,40 @@ if (!function_exists('gp')) {
     }
 }
 
+if (!function_exists('youtube_video_id')) {
+    /**
+     * Extracts the 11-character YouTube video ID from any common URL shape
+     * (watch/embed/shorts/youtu.be, with or without extra query params, any
+     * subdomain), or passes a bare 11-char ID straight through. Returns null
+     * if the input isn't recognizable as either.
+     *
+     * Used at BOTH admin-save time (AdminAdController, to validate/normalize
+     * what gets stored) and at render time (watch-earn view, to build the
+     * thumbnail URL) - reusing the exact same extractor at render time means
+     * a video ad's thumbnail self-heals even if the stored destination_url
+     * predates this normalization or was entered in a shape the original
+     * validation didn't anticipate, instead of silently rendering broken.
+     */
+    function youtube_video_id(string $input): ?string
+    {
+        $input = trim($input);
+        if (preg_match('/^[A-Za-z0-9_-]{11}$/', $input)) {
+            return $input;
+        }
+        if (preg_match('~(?:youtube(?:-nocookie)?\.com/(?:watch\?(?:[^\s#]*&)?v=|embed/|shorts/|v/)|youtu\.be/)([A-Za-z0-9_-]{11})~', $input, $m)) {
+            return $m[1];
+        }
+        return null;
+    }
+}
+
+if (!function_exists('youtube_thumbnail_url')) {
+    function youtube_thumbnail_url(string $videoId): string
+    {
+        return 'https://img.youtube.com/vi/' . rawurlencode($videoId) . '/hqdefault.jpg';
+    }
+}
+
 if (!function_exists('bcmoney')) {
     // Adds two decimal money strings safely (no float rounding errors).
     function bcmoney(string $a, string $b, int $scale = 2): string

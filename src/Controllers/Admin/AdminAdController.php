@@ -97,9 +97,9 @@ final class AdminAdController
                     throw new ValidationException(['destination_url' => 'A valid destination URL is required for external ads.']);
                 }
             } elseif ($type === 'video') {
-                $videoId = self::extractYoutubeId((string) $destinationUrl);
+                $videoId = youtube_video_id((string) $destinationUrl);
                 if ($videoId === null) {
-                    throw new ValidationException(['destination_url' => 'Enter a valid YouTube video URL (youtube.com/watch?v=... or youtu.be/...).']);
+                    throw new ValidationException(['destination_url' => 'Enter a valid YouTube video URL (youtube.com/watch?v=..., youtu.be/..., etc.) or the 11-character video ID.']);
                 }
                 $destinationUrl = $videoId;
             }
@@ -200,14 +200,5 @@ final class AdminAdController
         AuditLogger::log('admin', $admin['id'], 'ad.deleted', 'advertisement', $id, null, null, null, $request->ip());
         flash_success('Advertisement deleted.');
         redirect('/admin/ads');
-    }
-
-    /** Extracts the 11-character YouTube video ID from any common URL shape, or null if the input isn't one. */
-    private static function extractYoutubeId(string $url): ?string
-    {
-        if (preg_match('#(?:youtube\.com/(?:watch\?v=|embed/|shorts/)|youtu\.be/)([A-Za-z0-9_-]{11})#', $url, $m)) {
-            return $m[1];
-        }
-        return null;
     }
 }

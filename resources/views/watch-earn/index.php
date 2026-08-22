@@ -12,22 +12,30 @@
 <?php else: ?>
 <div class="product-grid mb-3">
   <?php foreach ($ads as $ad): ?>
+    <?php
+      // Re-extract the video ID at render time (not just trusting the stored
+      // column) so a thumbnail self-heals even for rows saved before this
+      // normalization existed, or in a URL shape the original validation
+      // didn't anticipate - see youtube_video_id() in helpers.php.
+      $videoId = $ad['type'] === 'video' && !empty($ad['destination_url']) ? youtube_video_id((string) $ad['destination_url']) : null;
+      $hasThumb = !empty($ad['image_path']) || $videoId !== null;
+    ?>
     <div class="glass-card product-card ad-card"
          data-ad-id="<?= (int) $ad['id'] ?>"
          data-title="<?= e($ad['title']) ?>"
          data-reward="<?= e(money($ad['reward_amount'])) ?>"
          data-watch-seconds="<?= (int) $ad['watch_seconds'] ?>"
          data-image="<?= e((string) ($ad['image_path'] ?? '')) ?>"
-         data-destination="<?= e((string) ($ad['destination_url'] ?? '')) ?>"
+         data-destination="<?= e($ad['type'] === 'video' ? (string) ($videoId ?? '') : (string) ($ad['destination_url'] ?? '')) ?>"
          data-type="<?= e($ad['type']) ?>">
       <div class="img-wrap">
         <?php if (!empty($ad['image_path'])): ?>
           <img src="<?= e($ad['image_path']) ?>" alt="<?= e($ad['title']) ?>" loading="lazy" onerror="this.style.display='none';this.parentElement.querySelector('.img-fallback').style.display='flex';">
-        <?php elseif ($ad['type'] === 'video' && !empty($ad['destination_url'])): ?>
-          <img src="https://img.youtube.com/vi/<?= e($ad['destination_url']) ?>/hqdefault.jpg" alt="<?= e($ad['title']) ?>" loading="lazy" onerror="this.style.display='none';this.parentElement.querySelector('.img-fallback').style.display='flex';">
+        <?php elseif ($videoId !== null): ?>
+          <img src="<?= e(youtube_thumbnail_url($videoId)) ?>" alt="<?= e($ad['title']) ?>" loading="lazy" onerror="this.style.display='none';this.parentElement.querySelector('.img-fallback').style.display='flex';">
           <span class="ad-play-badge">▶</span>
         <?php endif; ?>
-        <div class="img-fallback flex items-center justify-center" style="height:100%;font-size:28px;<?= (!empty($ad['image_path']) || ($ad['type'] === 'video' && !empty($ad['destination_url']))) ? 'display:none;' : '' ?>">📺</div>
+        <div class="img-fallback flex items-center justify-center" style="height:100%;font-size:28px;<?= $hasThumb ? 'display:none;' : '' ?>">📺</div>
       </div>
       <div class="body">
         <div class="title"><?= e($ad['title']) ?></div>
