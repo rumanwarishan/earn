@@ -625,6 +625,15 @@ table.data-table tr:hover td:last-child { background: #14141f; }
   0%, 100% { box-shadow: 0 0 0 0 rgba(47,224,166,0.45); }
   50% { box-shadow: 0 0 0 10px rgba(47,224,166,0); }
 }
+.flight-wallet-link { display: inline-flex; align-items: center; gap: 4px; }
+.flight-wallet-plane {
+  color: var(--orange-hi); transform: translateX(0);
+  animation: flightWalletPlaneFly 1.8s ease-in-out infinite;
+}
+@keyframes flightWalletPlaneFly {
+  0%, 100% { transform: translateX(0) translateY(0); }
+  50% { transform: translateX(3px) translateY(-2px); }
+}
 .flight-history-pills { display: flex; flex-wrap: wrap; gap: 8px; }
 .mult-pill {
   padding: 5px 11px; border-radius: 999px; font-size: 12.5px; font-weight: 700;
@@ -633,5 +642,5 @@ table.data-table tr:hover td:last-child { background: #14141f; }
 .mult-pill-good { background: rgba(47,224,166,0.14); border-color: rgba(47,224,166,0.3); color: var(--emerald); }
 .mult-pill-bad { background: rgba(255,93,122,0.12); border-color: rgba(255,93,122,0.28); color: var(--danger); }
 @media (prefers-reduced-motion: reduce) {
-  .flight-countdown-number, .flight-claim-btn { animation: none; }
+  .flight-countdown-number, .flight-claim-btn, .flight-wallet-plane { animation: none; }
 }

@@ -30,7 +30,8 @@ final class GamePointServiceTest extends TestCase
         $pdo->exec("UPDATE game_settings SET enabled = 1, maintenance_mode = 0, minimum_entry = 5.00, maximum_entry = 80.00,
             countdown_seconds = 5, round_grace_seconds = 3, growth_rate = 0.1200, starting_balance = 1000.00,
             daily_bonus_enabled = 1, daily_bonus_amount = 100.00, daily_bonus_max_per_day = 1,
-            exchange_enabled = 1, exchange_rate = 0.010000, min_exchange_amount = 100.00, max_exchange_per_day = 2000.00
+            exchange_enabled = 1, exchange_rate = 0.010000, min_exchange_amount = 100.00, max_exchange_per_day = 2000.00,
+            topup_enabled = 1, topup_rate = 100.000000, min_topup_amount = 1.00, max_topup_per_day = 50.00
             WHERE id = 1");
     }
 
@@ -202,5 +203,94 @@ final class GamePointServiceTest extends TestCase
 
         $this->expectException(RuntimeException::class);
         GamePointService::exchangeToWallet((int) $user['id'], '100.00', '127.0.0.1'); // 250 + 100 > 300 daily cap
+    }
+
+    public function test_topup_debits_wallet_and_credits_bs_atomically_at_configured_rate(): void
+    {
+        $pdo = Database::connection();
+        $user = TestSeed::createUser('gp-topup');
+        GamePointService::getOrCreateWallet((int) $user['id'], $pdo); // 1000.00 B$ starting balance
+        WalletService::applyLedgerEntry((int) $user['id'], 'deposited', '50.00', 'deposit_credit', null, null, 'test funding');
+
+        $bsBefore = GamePointService::balance((int) $user['id']);
+
+        $result = GamePointService::topUpFromWallet((int) $user['id'], '10.00', '127.0.0.1');
+
+        $this->assertSame('10.00', $result['usd_spent']);
+        $this->assertSame('1000.00', $result['bs_credited']); // 10 * 100 rate
+        $this->assertSame(bcadd($bsBefore, '1000.00', 2), $result['bs_balance']);
+        $this->assertSame(GamePointService::balance((int) $user['id']), $result['bs_balance']);
+
+        $wallet = WalletService::getOrCreateWallet((int) $user['id'], $pdo);
+        $this->assertSame('40.00', $wallet['deposited_balance']);
+
+        $stmt = $pdo->prepare("SELECT COUNT(*) FROM wallet_ledger WHERE user_id = ? AND type = 'game_topup' AND amount = '-10.00'");
+        $stmt->execute([$user['id']]);
+        $this->assertSame(1, (int) $stmt->fetchColumn());
+    }
+
+    public function test_topup_debits_across_multiple_buckets_in_priority_order(): void
+    {
+        $pdo = Database::connection();
+        $user = TestSeed::createUser('gp-topup-multi');
+        GamePointService::getOrCreateWallet((int) $user['id'], $pdo);
+        WalletService::applyLedgerEntry((int) $user['id'], 'deposited', '3.00', 'deposit_credit', null, null, 'test funding');
+        WalletService::applyLedgerEntry((int) $user['id'], 'referral', '20.00', 'referral_credit', null, null, 'test funding');
+
+        GamePointService::topUpFromWallet((int) $user['id'], '5.00', '127.0.0.1'); // 3 from deposited, 2 from referral
+
+        $wallet = WalletService::getOrCreateWallet((int) $user['id'], $pdo);
+        $this->assertSame('0.00', $wallet['deposited_balance']);
+        $this->assertSame('18.00', $wallet['referral_balance']);
+    }
+
+    public function test_topup_disabled_is_rejected(): void
+    {
+        Database::connection()->exec('UPDATE game_settings SET topup_enabled = 0 WHERE id = 1');
+        $user = TestSeed::createUser('gp-topup-off');
+        GamePointService::getOrCreateWallet((int) $user['id'], Database::connection());
+
+        $this->expectException(RuntimeException::class);
+        GamePointService::topUpFromWallet((int) $user['id'], '10.00', '127.0.0.1');
+    }
+
+    public function test_topup_below_minimum_is_rejected(): void
+    {
+        $user = TestSeed::createUser('gp-topup-min');
+        GamePointService::getOrCreateWallet((int) $user['id'], Database::connection());
+
+        $this->expectException(RuntimeException::class);
+        GamePointService::topUpFromWallet((int) $user['id'], '0.10', '127.0.0.1'); // below the 1.00 minimum
+    }
+
+    public function test_topup_beyond_wallet_balance_is_rejected_and_bs_untouched(): void
+    {
+        $pdo = Database::connection();
+        $user = TestSeed::createUser('gp-topup-overdraw');
+        GamePointService::getOrCreateWallet((int) $user['id'], $pdo);
+        $bsBefore = GamePointService::balance((int) $user['id']);
+
+        try {
+            GamePointService::topUpFromWallet((int) $user['id'], '25.00', '127.0.0.1'); // wallet has $0
+            $this->fail('Expected an exception for topping up more than the wallet holds');
+        } catch (\Throwable $e) {
+            // expected - fall through to assert nothing was credited
+        }
+
+        $this->assertSame($bsBefore, GamePointService::balance((int) $user['id']), 'A failed top-up must not credit B$');
+    }
+
+    public function test_topup_daily_cap_is_enforced(): void
+    {
+        $pdo = Database::connection();
+        $pdo->exec('UPDATE game_settings SET max_topup_per_day = 30.00 WHERE id = 1');
+        $user = TestSeed::createUser('gp-topup-cap');
+        GamePointService::getOrCreateWallet((int) $user['id'], $pdo);
+        WalletService::applyLedgerEntry((int) $user['id'], 'deposited', '100.00', 'deposit_credit', null, null, 'test funding');
+
+        GamePointService::topUpFromWallet((int) $user['id'], '25.00', '127.0.0.1');
+
+        $this->expectException(RuntimeException::class);
+        GamePointService::topUpFromWallet((int) $user['id'], '10.00', '127.0.0.1'); // 25 + 10 > 30 daily cap
     }
 }

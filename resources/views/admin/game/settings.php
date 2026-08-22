@@ -32,5 +32,14 @@
   <div class="field"><label>Minimum exchange amount (B$)</label><input class="input" type="text" name="min_exchange_amount" value="<?= e((string) $settings['min_exchange_amount']) ?>"></div>
   <div class="field"><label>Maximum B$ exchanged per user per day</label><input class="input" type="text" name="max_exchange_per_day" value="<?= e((string) $settings['max_exchange_per_day']) ?>"></div>
 
+  <h3 class="mb-3 mt-4" style="font-size:14px;">Convert wallet to B$</h3>
+  <div class="glass-panel mb-3" style="padding:12px 14px;font-size:12px;color:var(--text-mid);">
+    Lets a user spend real wallet balance to top up B$ and keep playing.
+  </div>
+  <label class="flex items-center gap-2 mb-3"><input type="checkbox" name="topup_enabled" <?= !empty($settings['topup_enabled']) ? 'checked' : '' ?>> Converting wallet balance to B$ enabled</label>
+  <div class="field"><label>Top-up rate (B$ per 1 USD)</label><input class="input" type="text" name="topup_rate" value="<?= e((string) $settings['topup_rate']) ?>"></div>
+  <div class="field"><label>Minimum top-up amount (USD)</label><input class="input" type="text" name="min_topup_amount" value="<?= e((string) $settings['min_topup_amount']) ?>"></div>
+  <div class="field"><label>Maximum USD converted per user per day</label><input class="input" type="text" name="max_topup_per_day" value="<?= e((string) $settings['max_topup_per_day']) ?>"></div>
+
   <button class="btn btn-primary" type="submit">Save settings</button>
 </form>

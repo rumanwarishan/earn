@@ -51,7 +51,7 @@ final class ChatbotService
         }
         if (self::any($text, ['flight', 'billions flight', 'crash game', 'b$', 'billions currency'])) {
             return [
-                'reply' => "Billions Flight is a crash-style mini-game played with B\$ (Billions Store Currency). Joining a round, winning, and losing all happen in B\$ only - your financial wallet is never touched by gameplay. When you want, use \"Exchange B\$ to wallet\" on the Game page to convert your B\$ balance into real wallet balance at the current rate. Play any time from the Game tab.",
+                'reply' => "Billions Flight is a crash-style mini-game played with B\$ (Billions Store Currency). Joining a round, winning, and losing all happen in B\$ only - your financial wallet is never touched by gameplay. On the Game page, use \"Convert wallet to B\$\" to fund play from your real wallet balance, or \"Exchange B\$ to wallet\" to cash your B\$ back out - both at the current admin-set rate. Play any time from the Game tab.",
                 'quick_replies' => self::defaultQuickReplies(),
             ];
         }

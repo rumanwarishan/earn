@@ -14,9 +14,10 @@ use RuntimeException;
  * one DB transaction) but on entirely separate tables, so ordinary gameplay
  * (joining a round, winning, losing) never touches wallets/wallet_ledger.
  *
- * exchangeToWallet() below is the ONE deliberate, explicit bridge to the
- * real financial wallet - a user-initiated action, never automatic, rate-
- * limited by admin-configured settings, and atomic across both ledgers.
+ * exchangeToWallet() and topUpFromWallet() below are the ONLY deliberate,
+ * explicit bridges to the real financial wallet - both user-initiated,
+ * never automatic, rate-limited by admin-configured settings, and atomic
+ * across both ledgers.
  */
 final class GamePointService
 {
@@ -68,7 +69,7 @@ final class GamePointService
         ?string $adminReason = null,
         bool $allowNegative = false,
     ): array {
-        $validTypes = ['game_entry', 'game_cashout', 'game_loss', 'admin_grant', 'admin_adjustment', 'daily_bonus', 'exchange'];
+        $validTypes = ['game_entry', 'game_cashout', 'game_loss', 'admin_grant', 'admin_adjustment', 'daily_bonus', 'exchange', 'topup'];
         if (!in_array($type, $validTypes, true)) {
             throw new RuntimeException("Invalid game point ledger type: {$type}");
         }
@@ -193,6 +194,79 @@ final class GamePointService
                 'usd_credited' => $usdAmount,
                 'bs_balance' => $gpResult['resulting_balance'],
                 'wallet_balance' => $walletResult['resulting_balance'],
+            ];
+        });
+    }
+
+    /**
+     * The reverse bridge: converts real wallet USD into B$ balance so a
+     * user can fund play, debiting the user's spendable wallet balance
+     * (deposited, then cashback, then referral - same priority order as
+     * any other purchase) and crediting B$ atomically in one transaction.
+     * Same deliberate, rate-limited, user-initiated design as
+     * exchangeToWallet() above, just in the opposite direction.
+     */
+    public static function topUpFromWallet(int $userId, string $usdAmount, string $ip): array
+    {
+        $pdo = Database::connection();
+        $settings = GameSettingsService::current($pdo);
+
+        if (!(bool) $settings['topup_enabled']) {
+            throw new RuntimeException('Converting wallet balance to B$ is currently unavailable.');
+        }
+        if (bccomp($usdAmount, $settings['min_topup_amount'], 2) < 0) {
+            throw new RuntimeException('Minimum top-up amount is ' . money($settings['min_topup_amount']) . '.');
+        }
+
+        return Database::transaction(function (PDO $pdo) use ($userId, $usdAmount, $ip, $settings) {
+            $wallet = WalletService::getOrCreateWallet($userId, $pdo, lock: true);
+
+            if ((bool) $wallet['is_frozen']) {
+                throw new RuntimeException('Wallet is frozen. Contact support.');
+            }
+
+            $stmt = $pdo->prepare("SELECT COALESCE(SUM(-amount), 0) FROM wallet_ledger
+                WHERE user_id = ? AND type = 'game_topup' AND created_at >= (NOW() - INTERVAL 24 HOUR)");
+            $stmt->execute([$userId]);
+            $toppedUpToday = (string) $stmt->fetchColumn();
+            if (bccomp(bcadd($toppedUpToday, $usdAmount, 2), $settings['max_topup_per_day'], 2) > 0) {
+                throw new RuntimeException('This would exceed your daily top-up limit of ' . money($settings['max_topup_per_day']) . '.');
+            }
+
+            $remaining = $usdAmount;
+            foreach (['deposited', 'cashback', 'referral'] as $bucket) {
+                if (bccomp($remaining, '0', 2) <= 0) {
+                    break;
+                }
+                $available = $wallet[$bucket . '_balance'];
+                if (bccomp($available, '0', 2) <= 0) {
+                    continue;
+                }
+                $take = bccomp($available, $remaining, 2) < 0 ? $available : $remaining;
+
+                WalletService::applyLedgerEntry(
+                    $userId, $bucket, bcmul($take, '-1', 2), 'game_topup',
+                    'game_point_wallet', null, 'Converted to B$ for Billions Flight',
+                    'user', $userId, null, $ip,
+                );
+
+                $remaining = bcsub($remaining, $take, 2);
+            }
+
+            if (bccomp($remaining, '0', 2) > 0) {
+                throw new InsufficientBalanceException('Insufficient wallet balance for this top-up.');
+            }
+
+            $bsAmount = bcmul($usdAmount, (string) $settings['topup_rate'], 2);
+            $gpResult = self::applyLedgerEntry(
+                $userId, $bsAmount, 'topup',
+                'wallet_topup', null, 'Converted ' . money($usdAmount) . ' from wallet',
+            );
+
+            return [
+                'usd_spent' => $usdAmount,
+                'bs_credited' => $bsAmount,
+                'bs_balance' => $gpResult['resulting_balance'],
             ];
         });
     }

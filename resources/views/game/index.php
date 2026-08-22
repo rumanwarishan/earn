@@ -6,9 +6,33 @@
   </div>
   <div style="text-align:right;">
     <button class="btn btn-secondary btn-sm" type="button" id="dailyBonusBtn"<?= $settings['daily_bonus_enabled'] ? '' : ' style="display:none;"' ?>>Daily Bonus</button>
-    <div class="mt-2"><a href="/wallet" class="text-muted" style="font-size:11px;">Financial Wallet &rarr;</a></div>
+    <div class="mt-2">
+      <a href="/wallet" class="text-muted flight-wallet-link" style="font-size:11px;">
+        Financial Wallet
+        <svg class="flight-wallet-plane" viewBox="0 0 24 24" width="14" height="14" fill="none" aria-hidden="true">
+          <path d="M2 12.5l8-1 4.5-7 2 .5-2.5 6.8 6-.3 2.5 1.5-2.5 1.5-6-.3 2.5 6.8-2 .5-4.5-7-8-1z" fill="currentColor"/>
+        </svg>
+      </a>
+    </div>
   </div>
 </div>
+
+<div class="section-head" style="margin-top:0;"><h3>Convert wallet to B$</h3></div>
+<form method="POST" action="/game/topup" class="glass-card mb-3" style="padding:18px;">
+  <?= csrf_field() ?>
+  <div class="field">
+    <label>Amount (USD)</label>
+    <input class="input" type="text" name="amount" placeholder="<?= e((string) $settings['min_topup_amount']) ?>" inputmode="decimal">
+    <div class="field-hint">
+      Rate: $1 = <?= gp(bcmul('1', (string) $settings['topup_rate'], 2)) ?> &middot;
+      Min <?= money($settings['min_topup_amount']) ?> &middot;
+      Daily limit <?= money($settings['max_topup_per_day']) ?> &middot;
+      Wallet balance: <?= money($walletBalance) ?>
+    </div>
+  </div>
+  <button class="btn btn-primary w-full" type="submit"<?= $settings['topup_enabled'] ? '' : ' disabled' ?>>Convert to B$</button>
+  <?php if (!$settings['topup_enabled']): ?><div class="text-muted mt-2" style="font-size:11.5px;">Converting is temporarily disabled.</div><?php endif; ?>
+</form>
 
 <div class="glass-card glow-border flight-stage" id="flightStage" style="padding:0;">
   <div class="flight-multiplier" id="flightMultiplier">1.00x</div>
@@ -92,7 +116,7 @@
 </div>
 
 <div class="glass-panel mb-3" style="padding:14px;font-size:12px;color:var(--text-mid);">
-  B$ is Billions Flight's in-game currency. Play with B$ as much as you like - your financial wallet is never touched by joining, winning, or losing a round. When you're ready, use "Exchange B$ to wallet" above to convert your B$ balance into real wallet balance at the current rate, subject to the minimum amount and daily limit shown.
+  B$ is Billions Flight's in-game currency. Play with B$ as much as you like - your financial wallet is never touched by joining, winning, or losing a round. Use "Convert wallet to B$" to fund play from your real balance, or "Exchange B$ to wallet" to cash your B$ back out - both convert at the current admin-set rate, subject to the minimum amount and daily limit shown.
 </div>
 
 <script>window.FLIGHT_SETTINGS = <?= json_encode(['minimum_entry' => $settings['minimum_entry'], 'maximum_entry' => $settings['maximum_entry']]) ?>;</script>

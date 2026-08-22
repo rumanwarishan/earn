@@ -104,6 +104,7 @@ $router->group('', [SecurityHeaders::class, MaintenanceMode::class], function (R
         $router->post('/game/round/{uuid}/cashout', [GameController::class, 'cashout'], [VerifyCsrfToken::class]);
         $router->post('/game/daily-bonus', [GameController::class, 'dailyBonus'], [VerifyCsrfToken::class]);
         $router->post('/game/exchange', [GameController::class, 'exchange'], [VerifyCsrfToken::class]);
+        $router->post('/game/topup', [GameController::class, 'topup'], [VerifyCsrfToken::class]);
         $router->get('/game/history', [GameController::class, 'history']);
         $router->get('/game/round-history', [GameController::class, 'roundHistory']);
     });

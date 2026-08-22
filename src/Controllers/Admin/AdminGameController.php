@@ -30,6 +30,8 @@ final class AdminGameController
             'todays_games' => (int) $pdo->query('SELECT COUNT(*) FROM game_bets WHERE DATE(placed_at) = CURDATE()')->fetchColumn(),
             'total_exchanged_bs' => (string) $pdo->query("SELECT COALESCE(SUM(-amount),0) FROM game_point_ledger WHERE type = 'exchange'")->fetchColumn(),
             'total_exchanged_usd' => (string) $pdo->query("SELECT COALESCE(SUM(amount),0) FROM wallet_ledger WHERE type = 'game_exchange'")->fetchColumn(),
+            'total_topped_up_usd' => (string) $pdo->query("SELECT COALESCE(SUM(-amount),0) FROM wallet_ledger WHERE type = 'game_topup'")->fetchColumn(),
+            'total_topped_up_bs' => (string) $pdo->query("SELECT COALESCE(SUM(amount),0) FROM game_point_ledger WHERE type = 'topup'")->fetchColumn(),
         ];
 
         $activeRound = $pdo->query("SELECT * FROM game_rounds WHERE status IN ('waiting','running') ORDER BY id DESC LIMIT 1")->fetch();
@@ -91,10 +93,11 @@ final class AdminGameController
             'round_grace_seconds', 'growth_rate', 'starting_balance',
             'daily_bonus_enabled', 'daily_bonus_amount', 'daily_bonus_max_per_day',
             'exchange_enabled', 'exchange_rate', 'min_exchange_amount', 'max_exchange_per_day',
+            'topup_enabled', 'topup_rate', 'min_topup_amount', 'max_topup_per_day',
         ]);
 
         try {
-            foreach (['minimum_entry', 'maximum_entry', 'starting_balance', 'daily_bonus_amount', 'min_exchange_amount', 'max_exchange_per_day'] as $field) {
+            foreach (['minimum_entry', 'maximum_entry', 'starting_balance', 'daily_bonus_amount', 'min_exchange_amount', 'max_exchange_per_day', 'min_topup_amount', 'max_topup_per_day'] as $field) {
                 if (!preg_match('/^\d+(\.\d{1,2})?$/', (string) $data[$field])) {
                     throw new ValidationException([$field => 'Enter a valid amount.']);
                 }
@@ -110,6 +113,12 @@ final class AdminGameController
             }
             if (bccomp((string) $data['min_exchange_amount'], (string) $data['max_exchange_per_day'], 2) > 0) {
                 throw new ValidationException(['min_exchange_amount' => 'Minimum exchange cannot be greater than the daily limit.']);
+            }
+            if (!preg_match('/^\d+(\.\d{1,6})?$/', (string) $data['topup_rate']) || (float) $data['topup_rate'] <= 0) {
+                throw new ValidationException(['topup_rate' => 'Enter a valid positive top-up rate.']);
+            }
+            if (bccomp((string) $data['min_topup_amount'], (string) $data['max_topup_per_day'], 2) > 0) {
+                throw new ValidationException(['min_topup_amount' => 'Minimum top-up cannot be greater than the daily limit.']);
             }
 
             GameSettingsService::update([
@@ -128,6 +137,10 @@ final class AdminGameController
                 'exchange_rate' => $data['exchange_rate'],
                 'min_exchange_amount' => $data['min_exchange_amount'],
                 'max_exchange_per_day' => $data['max_exchange_per_day'],
+                'topup_enabled' => isset($data['topup_enabled']) ? 1 : 0,
+                'topup_rate' => $data['topup_rate'],
+                'min_topup_amount' => $data['min_topup_amount'],
+                'max_topup_per_day' => $data['max_topup_per_day'],
             ]);
 
             AuditLogger::log('admin', $admin['id'], 'game.settings_updated', 'game_settings', 1, null, $data, null, $request->ip());

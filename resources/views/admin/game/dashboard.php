@@ -16,6 +16,7 @@
   <div class="glass-panel stat-tile"><div class="label">Total B$ won</div><div class="value" style="color:var(--emerald);"><?= gp($stats['total_won']) ?></div></div>
   <div class="glass-panel stat-tile"><div class="label">Total B$ lost</div><div class="value" style="color:var(--danger);"><?= gp($stats['total_lost']) ?></div></div>
   <div class="glass-panel stat-tile"><div class="label">Total exchanged to wallet</div><div class="value"><?= gp($stats['total_exchanged_bs']) ?></div><div class="text-muted mt-1" style="font-size:11px;"><?= money($stats['total_exchanged_usd']) ?> credited</div></div>
+  <div class="glass-panel stat-tile"><div class="label">Total converted from wallet</div><div class="value"><?= money($stats['total_topped_up_usd']) ?></div><div class="text-muted mt-1" style="font-size:11px;"><?= gp($stats['total_topped_up_bs']) ?> credited</div></div>
 </div>
 
 <div class="section-head"><h3>Active round</h3></div>

@@ -12,6 +12,7 @@ use App\Services\GamePointService;
 use App\Services\GameRoundService;
 use App\Services\GameSettingsService;
 use App\Services\NotificationService;
+use App\Services\WalletService;
 use RuntimeException;
 
 final class GameController
@@ -21,6 +22,7 @@ final class GameController
         $user = Session::get('user');
         $pdo = Database::connection();
         GamePointService::getOrCreateWallet((int) $user['id'], $pdo);
+        $wallet = WalletService::getOrCreateWallet((int) $user['id'], $pdo);
 
         echo view('layouts.app', [
             'pageTitle' => 'Billions Flight',
@@ -30,6 +32,7 @@ final class GameController
                 'settings' => GameSettingsService::current($pdo),
                 'recentRounds' => GameRoundService::recentRounds(12),
                 'history' => GameRoundService::userHistory((int) $user['id'], 15),
+                'walletBalance' => WalletService::spendableBalance($wallet),
             ]),
         ]);
     }
@@ -98,8 +101,31 @@ final class GameController
         try {
             $result = GamePointService::exchangeToWallet((int) $user['id'], $amount, $request->ip());
             flash_success('Exchanged B$' . number_format((float) $result['bs_exchanged'], 2) . ' for ' . money($result['usd_credited']) . ' in your wallet.');
+            redirect('/wallet');
+            return;
         } catch (\Throwable $e) {
             flash_errors(['amount' => $e->getMessage()]);
+        }
+
+        redirect('/game');
+    }
+
+    public function topup(Request $request): void
+    {
+        $user = Session::get('user');
+        $amount = trim((string) $request->input('amount', ''));
+
+        if (!preg_match('/^\d+(\.\d{1,2})?$/', $amount) || bccomp($amount, '0', 2) <= 0) {
+            flash_errors(['topup_amount' => 'Enter a valid USD amount to convert.']);
+            redirect('/game');
+            return;
+        }
+
+        try {
+            $result = GamePointService::topUpFromWallet((int) $user['id'], $amount, $request->ip());
+            flash_success('Converted ' . money($result['usd_spent']) . ' into ' . gp($result['bs_credited']) . '.');
+        } catch (\Throwable $e) {
+            flash_errors(['topup_amount' => $e->getMessage()]);
         }
 
         redirect('/game');

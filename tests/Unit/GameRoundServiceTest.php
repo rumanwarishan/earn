@@ -33,7 +33,8 @@ final class GameRoundServiceTest extends TestCase
         $pdo->exec("UPDATE game_settings SET enabled = 1, maintenance_mode = 0, minimum_entry = 5.00, maximum_entry = 80.00,
             countdown_seconds = 5, round_grace_seconds = 3, growth_rate = 0.1200, starting_balance = 1000.00,
             daily_bonus_enabled = 1, daily_bonus_amount = 100.00, daily_bonus_max_per_day = 1,
-            exchange_enabled = 1, exchange_rate = 0.010000, min_exchange_amount = 100.00, max_exchange_per_day = 2000.00
+            exchange_enabled = 1, exchange_rate = 0.010000, min_exchange_amount = 100.00, max_exchange_per_day = 2000.00,
+            topup_enabled = 1, topup_rate = 100.000000, min_topup_amount = 1.00, max_topup_per_day = 50.00
             WHERE id = 1");
         $pdo->exec('DELETE FROM game_rounds');
     }
