@@ -1,19 +1,66 @@
-<div class="flight-top flex items-center justify-between mb-3">
-  <div>
-    <div class="text-muted" style="font-size:12px;">B$ Balance</div>
-    <div class="flight-gp-balance" id="gpBalance"><?= gp($balance) ?></div>
-    <span class="badge badge-emerald mt-1" style="display:inline-block;">REDEEMABLE FOR USD</span>
-  </div>
-  <div style="text-align:right;">
-    <button class="btn btn-secondary btn-sm" type="button" id="dailyBonusBtn"<?= $settings['daily_bonus_enabled'] ? '' : ' style="display:none;"' ?>>Daily Bonus</button>
-    <div class="mt-2">
-      <a href="/wallet" class="text-muted flight-wallet-link" style="font-size:11px;">
-        Financial Wallet
-        <svg class="flight-wallet-plane" viewBox="0 0 24 24" width="14" height="14" fill="none" aria-hidden="true">
-          <path d="M2 12.5l8-1 4.5-7 2 .5-2.5 6.8 6-.3 2.5 1.5-2.5 1.5-6-.3 2.5 6.8-2 .5-4.5-7-8-1z" fill="currentColor"/>
-        </svg>
-      </a>
+<div class="glass-card glow-border flight-header mb-3">
+  <div class="flex items-center justify-between">
+    <div>
+      <div class="text-muted" style="font-size:12px;">B$ Balance</div>
+      <div class="flight-gp-balance" id="gpBalance"><?= gp($balance) ?></div>
+      <span class="badge badge-emerald mt-1" style="display:inline-block;">REDEEMABLE FOR USD</span>
     </div>
+    <div style="text-align:right;">
+      <button class="btn btn-secondary btn-sm" type="button" id="dailyBonusBtn"<?= $settings['daily_bonus_enabled'] ? '' : ' style="display:none;"' ?>>Daily Bonus</button>
+      <div class="mt-2">
+        <a href="/wallet" class="text-muted flight-wallet-link" style="font-size:11px;">
+          Financial Wallet
+          <svg class="flight-wallet-plane" viewBox="0 0 24 24" width="14" height="14" fill="none" aria-hidden="true">
+            <path d="M2 12.5l8-1 4.5-7 2 .5-2.5 6.8 6-.3 2.5 1.5-2.5 1.5-6-.3 2.5 6.8-2 .5-4.5-7-8-1z" fill="currentColor"/>
+          </svg>
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="flight-howto mb-3">
+  <div class="flight-howto-step"><span class="flight-howto-num">1</span>Convert wallet &rarr; B$</div>
+  <div class="flight-howto-step"><span class="flight-howto-num">2</span>Enter your stake</div>
+  <div class="flight-howto-step"><span class="flight-howto-num">3</span>Join before GO</div>
+  <div class="flight-howto-step"><span class="flight-howto-num">4</span>Cash out before it crashes!</div>
+</div>
+
+<div class="glass-card glow-border flight-panel mb-3">
+  <div class="flight-stage" id="flightStage">
+    <div class="flight-multiplier" id="flightMultiplier">1.00x</div>
+    <canvas id="flightCanvas"></canvas>
+    <div class="flight-overlay flight-countdown" id="flightCountdown" style="display:none;">
+      <div class="flight-countdown-number" id="flightCountdownNumber">3</div>
+      <div class="text-muted" style="font-size:12px;">Get ready...</div>
+    </div>
+    <div class="flight-overlay flight-crashed-overlay" id="flightCrashedOverlay" style="display:none;">
+      <div class="flight-crashed-label">CRASHED</div>
+      <div class="flight-crashed-mult" id="flightCrashedMult">1.00x</div>
+    </div>
+  </div>
+
+  <div class="flight-controls">
+    <div id="entryRow">
+      <div class="field" style="margin-bottom:10px;">
+        <label>Entry (B$)</label>
+        <input class="input" type="number" id="stakeInput" step="0.01"
+               min="<?= e((string) $settings['minimum_entry']) ?>" max="<?= e((string) $settings['maximum_entry']) ?>"
+               value="<?= e((string) $settings['minimum_entry']) ?>">
+        <div class="field-hint">Min <?= gp($settings['minimum_entry']) ?> &middot; Max <?= gp($settings['maximum_entry']) ?></div>
+      </div>
+      <div class="text-muted mb-2" style="font-size:12.5px;" id="potentialResult">Potential result: <?= gp($settings['minimum_entry']) ?> &times; current multiplier</div>
+      <button class="btn btn-primary w-full flight-join-btn" type="button" id="joinBtn">JOIN ROUND</button>
+    </div>
+
+    <button class="btn btn-primary w-full flight-claim-btn" type="button" id="claimBtn" style="display:none;">
+      CLAIM <span id="claimAmount">B$0.00</span>
+    </button>
+
+    <div id="waitingMsg" class="text-muted text-center" style="display:none;font-size:13px;padding:8px 0;">You're in! Waiting for takeoff&hellip;</div>
+    <div id="spectateMsg" class="text-muted text-center" style="display:none;font-size:13px;padding:8px 0;">Round in progress &mdash; join the next flight below.</div>
+    <div id="roundResult" class="text-center" style="display:none;padding:8px 0;font-weight:700;"></div>
+    <div id="connectionMsg" class="alert alert-error mt-2" style="display:none;">Connection interrupted. Reconnecting&hellip;</div>
   </div>
 </div>
 
@@ -51,52 +98,18 @@
   </form>
 </div>
 
-<div class="glass-card glow-border flight-stage" id="flightStage" style="padding:0;">
-  <div class="flight-multiplier" id="flightMultiplier">1.00x</div>
-  <canvas id="flightCanvas"></canvas>
-  <div class="flight-overlay flight-countdown" id="flightCountdown" style="display:none;">
-    <div class="flight-countdown-number" id="flightCountdownNumber">3</div>
-    <div class="text-muted" style="font-size:12px;">Get ready...</div>
-  </div>
-  <div class="flight-overlay flight-crashed-overlay" id="flightCrashedOverlay" style="display:none;">
-    <div class="flight-crashed-label">CRASHED</div>
-    <div class="flight-crashed-mult" id="flightCrashedMult">1.00x</div>
-  </div>
-</div>
-
-<div class="glass-card flight-controls mt-3" style="padding:18px;">
-  <div id="entryRow">
-    <div class="field" style="margin-bottom:10px;">
-      <label>Entry (B$)</label>
-      <input class="input" type="number" id="stakeInput" step="0.01"
-             min="<?= e((string) $settings['minimum_entry']) ?>" max="<?= e((string) $settings['maximum_entry']) ?>"
-             value="<?= e((string) $settings['minimum_entry']) ?>">
-      <div class="field-hint">Min <?= gp($settings['minimum_entry']) ?> &middot; Max <?= gp($settings['maximum_entry']) ?></div>
-    </div>
-    <div class="text-muted mb-2" style="font-size:12.5px;" id="potentialResult">Potential result: <?= gp($settings['minimum_entry']) ?> &times; current multiplier</div>
-    <button class="btn btn-primary w-full flight-join-btn" type="button" id="joinBtn">JOIN ROUND</button>
-  </div>
-
-  <button class="btn btn-primary w-full flight-claim-btn" type="button" id="claimBtn" style="display:none;">
-    CLAIM <span id="claimAmount">B$0.00</span>
-  </button>
-
-  <div id="waitingMsg" class="text-muted text-center" style="display:none;font-size:13px;padding:8px 0;">You're in! Waiting for takeoff&hellip;</div>
-  <div id="spectateMsg" class="text-muted text-center" style="display:none;font-size:13px;padding:8px 0;">Round in progress &mdash; join the next flight below.</div>
-  <div id="roundResult" class="text-center" style="display:none;padding:8px 0;font-weight:700;"></div>
-  <div id="connectionMsg" class="alert alert-error mt-2" style="display:none;">Connection interrupted. Reconnecting&hellip;</div>
-</div>
-
 <div class="section-head"><h3>Recent flights</h3></div>
-<div class="flight-history-pills mb-3" id="recentRoundsPills">
-  <?php foreach ($recentRounds as $r): $m = (float) $r['crash_multiplier']; ?>
-    <span class="mult-pill <?= $m >= 2 ? 'mult-pill-good' : ($m < 1.2 ? 'mult-pill-bad' : '') ?>"><?= number_format($m, 2) ?>x</span>
-  <?php endforeach; ?>
-  <?php if (!$recentRounds): ?><span class="text-muted" style="font-size:12.5px;">No flights yet.</span><?php endif; ?>
+<div class="glass-card glow-border mb-3" style="padding:14px 16px;">
+  <div class="flight-history-pills" id="recentRoundsPills">
+    <?php foreach ($recentRounds as $r): $m = (float) $r['crash_multiplier']; ?>
+      <span class="mult-pill <?= $m >= 2 ? 'mult-pill-good' : ($m < 1.2 ? 'mult-pill-bad' : '') ?>"><?= number_format($m, 2) ?>x</span>
+    <?php endforeach; ?>
+    <?php if (!$recentRounds): ?><span class="text-muted" style="font-size:12.5px;">No flights yet.</span><?php endif; ?>
+  </div>
 </div>
 
 <div class="section-head"><h3>My game history</h3></div>
-<div class="glass-card mb-3">
+<div class="glass-card glow-border mb-3">
   <?php if (!$history): ?>
     <div class="empty-state"><div class="icon">&#9992;</div>No games played yet. Join a round to get started.</div>
   <?php else: ?>
@@ -117,7 +130,7 @@
 </div>
 
 <div class="glass-panel mb-3" style="padding:14px;font-size:12px;color:var(--text-mid);">
-  B$ is Billions Flight's in-game currency. Play with B$ as much as you like - your financial wallet is never touched by joining, winning, or losing a round. Use the Convert card above to move funds either way between your wallet and B$, at the current admin-set rate, subject to the minimum amount and daily limit shown.
+  B$ is Billions Flight's in-game currency. Play with B$ as much as you like - your financial wallet is never touched by joining, winning, or losing a round. Use the Convert card to move funds either way between your wallet and B$, at the current admin-set rate.
 </div>
 
 <script>

@@ -580,14 +580,20 @@ table.data-table tr:hover td:last-child { background: #14141f; }
   background: linear-gradient(120deg, #fff, var(--orange-hi));
   -webkit-background-clip: text; background-clip: text; color: transparent;
 }
+/* Play panel: graph + entry/join controls as ONE visual card (glow-border
+   goes on this outer wrapper) - previously two separate cards with a gap
+   between them, which pushed the actual "how to play" controls further
+   down the page than they needed to be. */
+.flight-panel { padding: 0; overflow: hidden; }
 .flight-stage {
-  position: relative; overflow: hidden; border-radius: var(--radius-lg);
-  aspect-ratio: 4/3; background: radial-gradient(ellipse at 50% 100%, rgba(255,138,61,0.1), transparent 65%), var(--surface-1);
+  position: relative; overflow: hidden;
+  aspect-ratio: 16/9; background: radial-gradient(ellipse at 50% 100%, rgba(255,138,61,0.1), transparent 65%), var(--surface-1);
 }
 .flight-stage canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+.flight-controls { padding: 14px 18px 18px; border-top: 1px solid var(--surface-border); }
 .flight-multiplier {
-  position: absolute; top: 18px; left: 50%; transform: translateX(-50%); z-index: 2;
-  font-size: 42px; font-weight: 800; letter-spacing: -0.01em; color: #fff;
+  position: absolute; top: 14px; left: 50%; transform: translateX(-50%); z-index: 2;
+  font-size: 34px; font-weight: 800; letter-spacing: -0.01em; color: #fff;
   text-shadow: 0 0 22px rgba(255,138,61,0.6), 0 0 4px rgba(255,255,255,0.4);
   font-variant-numeric: tabular-nums;
 }
@@ -597,7 +603,7 @@ table.data-table tr:hover td:last-child { background: #14141f; }
   background: rgba(6,6,10,0.55); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
 }
 .flight-countdown-number {
-  font-size: 56px; font-weight: 800; color: var(--orange-hi);
+  font-size: 46px; font-weight: 800; color: var(--orange-hi);
   text-shadow: 0 0 26px rgba(255,138,61,0.7);
   animation: flightCountdownPulse 1s ease-in-out infinite;
 }
@@ -681,6 +687,22 @@ table.data-table tr:hover td:last-child { background: #14141f; }
 @keyframes flightWalletPlaneFly {
   0%, 100% { transform: translateX(0) translateY(0); }
   50% { transform: translateX(3px) translateY(-2px); }
+}
+.flight-header { padding: 16px 18px; }
+.flight-howto {
+  display: flex; gap: 8px; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none;
+}
+.flight-howto::-webkit-scrollbar { display: none; }
+.flight-howto-step {
+  flex: 0 0 auto; display: flex; align-items: center; gap: 6px;
+  background: var(--surface-2); border: 1px solid var(--surface-border);
+  border-radius: 999px; padding: 6px 12px 6px 6px; font-size: 11.5px; color: var(--text-mid); white-space: nowrap;
+}
+.flight-howto-num {
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  width: 19px; height: 19px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--orange), var(--magenta)); color: #1a0f05;
+  font-size: 10.5px; font-weight: 800;
 }
 .flight-history-pills { display: flex; flex-wrap: wrap; gap: 8px; }
 .mult-pill {

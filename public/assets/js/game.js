@@ -464,6 +464,13 @@
     return Number(n || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   }
 
+  function limitText(prefix, min, max) {
+    var parts = [];
+    if (Number(min) > 0) parts.push('Min ' + prefix + fmt2(min));
+    parts.push(Number(max) >= 100000000 ? 'No daily limit' : 'Daily limit ' + prefix + fmt2(max));
+    return parts.join(' · ');
+  }
+
   function rate() {
     return direction === 'toBs' ? Number(settings.topup_rate || 1) : Number(settings.exchange_rate || 1);
   }
@@ -481,7 +488,7 @@
       rateBadge.textContent = '1 USD = B$' + fmt2(settings.topup_rate);
       fromHint.textContent = 'Wallet balance: $' + fmt2(settings.wallet_balance);
       toHint.textContent = 'B$ balance: B$' + fmt2(settings.bs_balance);
-      limitHint.textContent = 'Min $' + fmt2(settings.min_topup_amount) + ' · Daily limit $' + fmt2(settings.max_topup_per_day);
+      limitHint.textContent = limitText('$', settings.min_topup_amount, settings.max_topup_per_day);
       submitBtn.textContent = 'Convert to B$';
       submitBtn.disabled = !settings.topup_enabled;
     } else {
@@ -491,7 +498,7 @@
       rateBadge.textContent = '1 B$ = $' + fmt2(settings.exchange_rate);
       fromHint.textContent = 'B$ balance: B$' + fmt2(settings.bs_balance);
       toHint.textContent = 'Wallet balance: $' + fmt2(settings.wallet_balance);
-      limitHint.textContent = 'Min B$' + fmt2(settings.min_exchange_amount) + ' · Daily limit B$' + fmt2(settings.max_exchange_per_day);
+      limitHint.textContent = limitText('B$', settings.min_exchange_amount, settings.max_exchange_per_day);
       submitBtn.textContent = 'Convert to USD';
       submitBtn.disabled = !settings.exchange_enabled;
     }
