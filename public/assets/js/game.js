@@ -89,58 +89,96 @@
 
     if (history.length < 2) return;
 
-    var pad = 20 * dpr;
+    var pad = 22 * dpr;
     var tMax = Math.max(history[history.length - 1].t, 1);
-    var mMax = Math.max(mult * 1.08, 1.3);
+    var mMax = Math.max(mult * 1.06, 1.3);
     var logMax = Math.log(mMax);
 
     function xFor(t) { return pad + (t / tMax) * (w - pad * 1.6); }
     function yFor(m) { return h - pad - (Math.log(Math.max(m, 1)) / logMax) * (h - pad * 1.8); }
 
+    var pts = [];
+    for (var n = 0; n < history.length; n++) pts.push([xFor(history[n].t), yFor(history[n].m)]);
+
+    // Smooth the polyline into a genuine curve (quadratic through midpoints)
+    // instead of a jagged straight-segment path - this is what makes the
+    // trajectory read as a rising slope rather than a staircase.
+    function tracePath() {
+      ctx.beginPath();
+      ctx.moveTo(pts[0][0], pts[0][1]);
+      for (var i = 1; i < pts.length - 1; i++) {
+        var mx = (pts[i][0] + pts[i + 1][0]) / 2;
+        var my = (pts[i][1] + pts[i + 1][1]) / 2;
+        ctx.quadraticCurveTo(pts[i][0], pts[i][1], mx, my);
+      }
+      var lastPt = pts[pts.length - 1];
+      ctx.lineTo(lastPt[0], lastPt[1]);
+    }
+
+    var crashedNow = stage.classList.contains('crashed');
+    var lineColor = crashedNow ? '#ff5d7a' : '#ff8a3d';
+
     var grad = ctx.createLinearGradient(0, 0, 0, h);
-    grad.addColorStop(0, 'rgba(255,138,61,0.32)');
+    grad.addColorStop(0, crashedNow ? 'rgba(255,93,122,0.34)' : 'rgba(255,138,61,0.36)');
+    grad.addColorStop(0.55, crashedNow ? 'rgba(255,93,122,0.12)' : 'rgba(255,138,61,0.12)');
     grad.addColorStop(1, 'rgba(255,138,61,0)');
 
-    ctx.beginPath();
-    ctx.moveTo(xFor(history[0].t), h);
-    for (var j = 0; j < history.length; j++) ctx.lineTo(xFor(history[j].t), yFor(history[j].m));
-    ctx.lineTo(xFor(history[history.length - 1].t), h);
+    tracePath();
+    ctx.lineTo(pts[pts.length - 1][0], h);
+    ctx.lineTo(pts[0][0], h);
     ctx.closePath();
     ctx.fillStyle = grad;
     ctx.fill();
 
-    var crashedNow = stage.classList.contains('crashed');
-    ctx.beginPath();
-    for (var k = 0; k < history.length; k++) {
-      var px = xFor(history[k].t), py = yFor(history[k].m);
-      if (k === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
-    }
-    ctx.strokeStyle = crashedNow ? '#ff5d7a' : '#ff8a3d';
-    ctx.lineWidth = 3 * dpr;
-    ctx.shadowColor = ctx.strokeStyle;
-    ctx.shadowBlur = 14 * dpr;
+    tracePath();
+    ctx.strokeStyle = lineColor;
+    ctx.lineWidth = 3.5 * dpr;
+    ctx.shadowColor = lineColor;
+    ctx.shadowBlur = 16 * dpr;
     ctx.lineJoin = 'round';
     ctx.lineCap = 'round';
     ctx.stroke();
     ctx.shadowBlur = 0;
 
     var last = history[history.length - 1];
-    var prevIdx = Math.max(0, history.length - 8);
+    var prevIdx = Math.max(0, history.length - 10);
     var prev = history[prevIdx];
     var lx = xFor(last.t), ly = yFor(last.m);
     var pxr = xFor(prev.t), pyr = yFor(prev.m);
     var angle = Math.atan2(ly - pyr, lx - pxr);
 
+    if (latest && latest.status === 'running' && Math.random() < 0.55) {
+      spawnSpark(lx + (Math.random() - 0.5) * 5 * dpr, ly + (Math.random() - 0.5) * 5 * dpr);
+    }
+    drawSparks(lx, ly, dpr, crashedNow);
+
     ctx.save();
     ctx.translate(lx, ly);
     ctx.rotate(angle);
-    ctx.font = (26 * dpr) + 'px sans-serif';
+    ctx.font = (30 * dpr) + 'px sans-serif';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.shadowColor = crashedNow ? '#ff5d7a' : '#ffb066';
-    ctx.shadowBlur = 20 * dpr;
+    ctx.shadowBlur = 22 * dpr;
     ctx.fillText('✈️', 0, 0);
     ctx.restore();
+  }
+
+  var sparks = [];
+  function spawnSpark(x, y) {
+    sparks.push({ x: x, y: y, life: 1, r: (2 + Math.random() * 2) * dpr });
+    if (sparks.length > 40) sparks.shift();
+  }
+  function drawSparks(planeX, planeY, dprLocal, crashedNow) {
+    for (var i = sparks.length - 1; i >= 0; i--) {
+      var s = sparks[i];
+      s.life -= 0.035;
+      if (s.life <= 0) { sparks.splice(i, 1); continue; }
+      ctx.beginPath();
+      ctx.fillStyle = (crashedNow ? 'rgba(255,93,122,' : 'rgba(255,176,102,') + (s.life * 0.6) + ')';
+      ctx.arc(s.x, s.y, s.r * s.life, 0, Math.PI * 2);
+      ctx.fill();
+    }
   }
 
   var rafHandle = null;
@@ -163,6 +201,7 @@
 
   function resetRoundUi() {
     history = [];
+    sparks = [];
     stage.classList.remove('crashed');
     countdownEl.style.display = 'none';
     crashedOverlay.style.display = 'none';

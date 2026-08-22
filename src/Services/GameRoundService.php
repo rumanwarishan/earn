@@ -20,8 +20,8 @@ use RuntimeException;
  */
 final class GameRoundService
 {
-    private const HOUSE_EDGE_BP = 300; // 3.00%
-    private const MAX_MULTIPLIER = '1000.00';
+    private const MIN_MULTIPLIER = 1.00;
+    private const MAX_MULTIPLIER = 5.00;
 
     /** Public, client-safe snapshot of the current round + this user's bet in it. */
     public static function currentState(int $userId): array
@@ -126,19 +126,20 @@ final class GameRoundService
         }
     }
 
-    /** Cryptographically secure crash point with a house edge, never Math.random()-derived. */
+    /**
+     * Cryptographically secure crash point, never Math.random()-derived,
+     * bounded to [1.00x, 5.00x] as requested. Squaring the uniform draw
+     * skews the distribution toward the low end (most rounds crash early,
+     * a high multiplier is rarer) while staying strictly within the range -
+     * no unbounded long tail like a pure inverse-odds formula would give.
+     */
     private static function generateCrashMultiplier(): string
     {
-        $r = random_int(1, 1_000_000) / 1_000_000; // uniform in (0, 1]
-        $edge = self::HOUSE_EDGE_BP / 10000;
-
-        if ($r <= $edge) {
-            return '1.00';
-        }
-
-        $raw = (1 - $edge) / (1 - $r);
-        $crash = floor($raw * 100) / 100;
-        $crash = max(1.00, min($crash, (float) self::MAX_MULTIPLIER));
+        $r = random_int(0, 1_000_000) / 1_000_000; // uniform in [0, 1]
+        $skewed = $r ** 2;
+        $crash = self::MIN_MULTIPLIER + ($skewed * (self::MAX_MULTIPLIER - self::MIN_MULTIPLIER));
+        $crash = floor($crash * 100) / 100;
+        $crash = max(self::MIN_MULTIPLIER, min($crash, self::MAX_MULTIPLIER));
 
         return number_format($crash, 2, '.', '');
     }

@@ -8,6 +8,7 @@ use App\Core\Database;
 use App\Core\Request;
 use App\Core\Session;
 use App\Services\NotificationService;
+use App\Services\TaskService;
 
 final class ReferralController
 {
@@ -57,6 +58,7 @@ final class ReferralController
                 'totalTeamCount' => $totalTeamCount,
                 'totalReferralEarnings' => $totalReferralEarnings,
                 'levels' => $levels,
+                'tasks' => TaskService::availableFor((int) $user['id']),
             ]),
         ]);
     }
