@@ -17,22 +17,39 @@
   </div>
 </div>
 
-<div class="section-head" style="margin-top:0;"><h3>Convert wallet to B$</h3></div>
-<form method="POST" action="/game/topup" class="glass-card mb-3" style="padding:18px;">
-  <?= csrf_field() ?>
-  <div class="field">
-    <label>Amount (USD)</label>
-    <input class="input" type="text" name="amount" placeholder="<?= e((string) $settings['min_topup_amount']) ?>" inputmode="decimal">
-    <div class="field-hint">
-      Rate: $1 = <?= gp(bcmul('1', (string) $settings['topup_rate'], 2)) ?> &middot;
-      Min <?= money($settings['min_topup_amount']) ?> &middot;
-      Daily limit <?= money($settings['max_topup_per_day']) ?> &middot;
-      Wallet balance: <?= money($walletBalance) ?>
+<div class="section-head" style="margin-top:0;"><h3>Convert</h3></div>
+<div class="glass-card swap-card mb-3" id="swapCard">
+  <div class="swap-rate-badge" id="swapRateBadge">1 USD = B$1.00</div>
+  <form method="POST" action="/game/topup" id="swapForm">
+    <?= csrf_field() ?>
+    <div class="swap-row">
+      <div class="swap-label">You send</div>
+      <div class="swap-input-row">
+        <input class="swap-amount" type="text" id="swapFromAmount" name="amount" inputmode="decimal" placeholder="0.00" autocomplete="off">
+        <span class="swap-currency" id="swapFromCurrency">USD</span>
+      </div>
+      <div class="swap-hint" id="swapFromHint"></div>
     </div>
-  </div>
-  <button class="btn btn-primary w-full" type="submit"<?= $settings['topup_enabled'] ? '' : ' disabled' ?>>Convert to B$</button>
-  <?php if (!$settings['topup_enabled']): ?><div class="text-muted mt-2" style="font-size:11.5px;">Converting is temporarily disabled.</div><?php endif; ?>
-</form>
+
+    <button type="button" class="swap-flip-btn" id="swapFlipBtn" aria-label="Swap direction">
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" aria-hidden="true">
+        <path d="M7 16V4M7 4L3.5 7.5M7 4l3.5 3.5M17 8v12M17 20l3.5-3.5M17 20l-3.5-3.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </button>
+
+    <div class="swap-row">
+      <div class="swap-label">You receive</div>
+      <div class="swap-input-row">
+        <input class="swap-amount" type="text" id="swapToAmount" readonly tabindex="-1" placeholder="0.00">
+        <span class="swap-currency" id="swapToCurrency">B$</span>
+      </div>
+      <div class="swap-hint" id="swapToHint"></div>
+    </div>
+
+    <button class="btn btn-primary w-full swap-submit-btn" type="submit" id="swapSubmitBtn">Convert to B$</button>
+    <div class="text-muted mt-2" style="font-size:11px;" id="swapLimitHint"></div>
+  </form>
+</div>
 
 <div class="glass-card glow-border flight-stage" id="flightStage" style="padding:0;">
   <div class="flight-multiplier" id="flightMultiplier">1.00x</div>
@@ -70,22 +87,6 @@
   <div id="connectionMsg" class="alert alert-error mt-2" style="display:none;">Connection interrupted. Reconnecting&hellip;</div>
 </div>
 
-<div class="section-head"><h3>Exchange B$ to wallet</h3></div>
-<form method="POST" action="/game/exchange" class="glass-card mb-3" style="padding:18px;">
-  <?= csrf_field() ?>
-  <div class="field">
-    <label>Amount (B$)</label>
-    <input class="input" type="text" name="amount" placeholder="<?= e((string) $settings['min_exchange_amount']) ?>" inputmode="decimal">
-    <div class="field-hint">
-      Rate: B$1 = <?= money(bcmul('1', (string) $settings['exchange_rate'], 4)) ?> &middot;
-      Min <?= gp($settings['min_exchange_amount']) ?> &middot;
-      Daily limit <?= gp($settings['max_exchange_per_day']) ?>
-    </div>
-  </div>
-  <button class="btn btn-secondary w-full" type="submit"<?= $settings['exchange_enabled'] ? '' : ' disabled' ?>>Exchange to wallet balance</button>
-  <?php if (!$settings['exchange_enabled']): ?><div class="text-muted mt-2" style="font-size:11.5px;">Exchanging is temporarily disabled.</div><?php endif; ?>
-</form>
-
 <div class="section-head"><h3>Recent flights</h3></div>
 <div class="flight-history-pills mb-3" id="recentRoundsPills">
   <?php foreach ($recentRounds as $r): $m = (float) $r['crash_multiplier']; ?>
@@ -116,8 +117,25 @@
 </div>
 
 <div class="glass-panel mb-3" style="padding:14px;font-size:12px;color:var(--text-mid);">
-  B$ is Billions Flight's in-game currency. Play with B$ as much as you like - your financial wallet is never touched by joining, winning, or losing a round. Use "Convert wallet to B$" to fund play from your real balance, or "Exchange B$ to wallet" to cash your B$ back out - both convert at the current admin-set rate, subject to the minimum amount and daily limit shown.
+  B$ is Billions Flight's in-game currency. Play with B$ as much as you like - your financial wallet is never touched by joining, winning, or losing a round. Use the Convert card above to move funds either way between your wallet and B$, at the current admin-set rate, subject to the minimum amount and daily limit shown.
 </div>
 
-<script>window.FLIGHT_SETTINGS = <?= json_encode(['minimum_entry' => $settings['minimum_entry'], 'maximum_entry' => $settings['maximum_entry']]) ?>;</script>
+<script>
+window.FLIGHT_SETTINGS = <?= json_encode([
+  'minimum_entry' => $settings['minimum_entry'],
+  'maximum_entry' => $settings['maximum_entry'],
+]) ?>;
+window.SWAP_SETTINGS = <?= json_encode([
+  'topup_enabled' => (bool) $settings['topup_enabled'],
+  'topup_rate' => $settings['topup_rate'],
+  'min_topup_amount' => $settings['min_topup_amount'],
+  'max_topup_per_day' => $settings['max_topup_per_day'],
+  'exchange_enabled' => (bool) $settings['exchange_enabled'],
+  'exchange_rate' => $settings['exchange_rate'],
+  'min_exchange_amount' => $settings['min_exchange_amount'],
+  'max_exchange_per_day' => $settings['max_exchange_per_day'],
+  'wallet_balance' => $walletBalance,
+  'bs_balance' => $balance,
+]) ?>;
+</script>
 <script src="<?= asset('js/game.js') ?>" defer></script>

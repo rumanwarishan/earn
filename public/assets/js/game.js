@@ -433,3 +433,79 @@
     });
   }
 })();
+
+/**
+ * Convert card: one Binance-style swap widget standing in for what used to
+ * be two separate forms (topup + exchange). Direction just decides which
+ * rate/limits/labels are shown and which endpoint the same form posts to -
+ * the server independently re-validates everything regardless of what the
+ * client displays here, so this is purely a UI convenience.
+ */
+(function () {
+  var card = document.getElementById('swapCard');
+  if (!card) return;
+
+  var settings = window.SWAP_SETTINGS || {};
+  var form = document.getElementById('swapForm');
+  var flipBtn = document.getElementById('swapFlipBtn');
+  var fromAmount = document.getElementById('swapFromAmount');
+  var toAmount = document.getElementById('swapToAmount');
+  var fromCurrency = document.getElementById('swapFromCurrency');
+  var toCurrency = document.getElementById('swapToCurrency');
+  var fromHint = document.getElementById('swapFromHint');
+  var toHint = document.getElementById('swapToHint');
+  var rateBadge = document.getElementById('swapRateBadge');
+  var limitHint = document.getElementById('swapLimitHint');
+  var submitBtn = document.getElementById('swapSubmitBtn');
+
+  var direction = 'toBs'; // 'toBs' = USD -> B$ (topup) | 'toUsd' = B$ -> USD (exchange)
+
+  function fmt2(n) {
+    return Number(n || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+
+  function rate() {
+    return direction === 'toBs' ? Number(settings.topup_rate || 1) : Number(settings.exchange_rate || 1);
+  }
+
+  function recomputeTo() {
+    var from = parseFloat(fromAmount.value);
+    toAmount.value = isFinite(from) && from > 0 ? fmt2(from * rate()) : '';
+  }
+
+  function render() {
+    if (direction === 'toBs') {
+      form.action = '/game/topup';
+      fromCurrency.textContent = 'USD';
+      toCurrency.textContent = 'B$';
+      rateBadge.textContent = '1 USD = B$' + fmt2(settings.topup_rate);
+      fromHint.textContent = 'Wallet balance: $' + fmt2(settings.wallet_balance);
+      toHint.textContent = 'B$ balance: B$' + fmt2(settings.bs_balance);
+      limitHint.textContent = 'Min $' + fmt2(settings.min_topup_amount) + ' · Daily limit $' + fmt2(settings.max_topup_per_day);
+      submitBtn.textContent = 'Convert to B$';
+      submitBtn.disabled = !settings.topup_enabled;
+    } else {
+      form.action = '/game/exchange';
+      fromCurrency.textContent = 'B$';
+      toCurrency.textContent = 'USD';
+      rateBadge.textContent = '1 B$ = $' + fmt2(settings.exchange_rate);
+      fromHint.textContent = 'B$ balance: B$' + fmt2(settings.bs_balance);
+      toHint.textContent = 'Wallet balance: $' + fmt2(settings.wallet_balance);
+      limitHint.textContent = 'Min B$' + fmt2(settings.min_exchange_amount) + ' · Daily limit B$' + fmt2(settings.max_exchange_per_day);
+      submitBtn.textContent = 'Convert to USD';
+      submitBtn.disabled = !settings.exchange_enabled;
+    }
+    recomputeTo();
+  }
+
+  flipBtn.addEventListener('click', function () {
+    direction = direction === 'toBs' ? 'toUsd' : 'toBs';
+    fromAmount.value = '';
+    toAmount.value = '';
+    render();
+  });
+
+  fromAmount.addEventListener('input', recomputeTo);
+
+  render();
+})();
