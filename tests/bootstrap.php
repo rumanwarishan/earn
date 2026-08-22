@@ -71,6 +71,7 @@ $tables = [
     // can mint a brand-new user that happens to reuse an old numeric id and
     // silently "inherit" that stale user's leftover ad/task completions).
     'ad_completions', 'ad_watch_sessions', 'advertisements', 'task_completions', 'tasks',
+    'game_point_ledger', 'game_point_wallets', 'game_bets', 'game_rounds', 'game_settings',
     'users',
 ];
 $pdo->exec('SET FOREIGN_KEY_CHECKS = 0');

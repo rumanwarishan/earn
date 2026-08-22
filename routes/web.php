@@ -7,6 +7,7 @@ use App\Controllers\AuthController;
 use App\Controllers\ChatbotController;
 use App\Controllers\DashboardController;
 use App\Controllers\DepositController;
+use App\Controllers\GameController;
 use App\Controllers\NotificationController;
 use App\Controllers\PurchaseController;
 use App\Controllers\TaskController;
@@ -21,6 +22,7 @@ use App\Controllers\Admin\AdminAuditController;
 use App\Controllers\Admin\AdminAuthController;
 use App\Controllers\Admin\AdminDashboardController;
 use App\Controllers\Admin\AdminDepositController;
+use App\Controllers\Admin\AdminGameController;
 use App\Controllers\Admin\AdminMarketplaceController;
 use App\Controllers\Admin\AdminMembershipController;
 use App\Controllers\Admin\AdminOrderController;
@@ -94,6 +96,15 @@ $router->group('', [SecurityHeaders::class, MaintenanceMode::class], function (R
         $router->post('/watch-and-earn/session/{uuid}/complete', [WatchEarnController::class, 'complete'], [VerifyCsrfToken::class]);
 
         $router->post('/shop/{id}/buy', [PurchaseController::class, 'buy'], [VerifyCsrfToken::class]);
+
+        // ---- Billions Flight (virtual Game Points only - see GameRoundService) ----
+        $router->get('/game', [GameController::class, 'index']);
+        $router->get('/game/state', [GameController::class, 'state']);
+        $router->post('/game/round/join', [GameController::class, 'join'], [VerifyCsrfToken::class]);
+        $router->post('/game/round/{uuid}/cashout', [GameController::class, 'cashout'], [VerifyCsrfToken::class]);
+        $router->post('/game/daily-bonus', [GameController::class, 'dailyBonus'], [VerifyCsrfToken::class]);
+        $router->get('/game/history', [GameController::class, 'history']);
+        $router->get('/game/round-history', [GameController::class, 'roundHistory']);
     });
 
     // ---- Admin panel ----
@@ -178,6 +189,12 @@ $router->group('', [SecurityHeaders::class, MaintenanceMode::class], function (R
             $router->post('/settings/referral-levels/{id}', [AdminSettingsController::class, 'updateReferralLevel'], [VerifyCsrfToken::class]);
 
             $router->get('/audit-logs', [AdminAuditController::class, 'index']);
+
+            $router->get('/game', [AdminGameController::class, 'index']);
+            $router->get('/game/rounds', [AdminGameController::class, 'rounds']);
+            $router->get('/game/settings', [AdminGameController::class, 'settingsShow']);
+            $router->post('/game/settings', [AdminGameController::class, 'settingsUpdate'], [VerifyCsrfToken::class]);
+            $router->post('/game-points/adjust', [AdminGameController::class, 'adjustGamePoints'], [VerifyCsrfToken::class]);
         });
     });
 });

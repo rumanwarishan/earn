@@ -184,6 +184,16 @@ if (!function_exists('btc_amount')) {
     }
 }
 
+if (!function_exists('gp')) {
+    // Billions Flight virtual Game Points - deliberately never routed through
+    // money(), which prints a $ sign. GP has no cash value and must never be
+    // displayed as if it were currency.
+    function gp(string|float|int $amount): string
+    {
+        return number_format((float) $amount, 2, '.', ',') . ' GP';
+    }
+}
+
 if (!function_exists('bcmoney')) {
     // Adds two decimal money strings safely (no float rounding errors).
     function bcmoney(string $a, string $b, int $scale = 2): string

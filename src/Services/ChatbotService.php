@@ -49,6 +49,12 @@ final class ChatbotService
                 'quick_replies' => ['How does cashback work?', 'Referral program'],
             ];
         }
+        if (self::any($text, ['flight', 'billions flight', 'crash game', 'game points', ' gp ', 'game point'])) {
+            return [
+                'reply' => "Billions Flight is a fun crash-style mini-game paid entirely in virtual Game Points (GP). GP are for entertainment only - they have no cash value and can NEVER be withdrawn, deposited, transferred, or converted to USD/BTC/USDT. Your real financial wallet is completely separate and is never touched by the game. Play it any time from the Game tab.",
+                'quick_replies' => self::defaultQuickReplies(),
+            ];
+        }
 
         $faq = self::searchFaq($text);
         if ($faq) {

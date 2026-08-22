@@ -44,6 +44,9 @@
         <a class="<?= adminActive('/admin/ads', $path) ?>" href="/admin/ads">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="5" width="19" height="13" rx="2.5"/><path d="M10 9.5l4.5 2.5-4.5 2.5v-5z" fill="currentColor" stroke="none"/></svg>
           Watch &amp; Earn</a>
+        <a class="<?= adminActive('/admin/game', $path) ?>" href="/admin/game">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 15l3-8a3 3 0 013-2h6a3 3 0 013 2l3 8"/><path d="M3 15a2.5 2.5 0 002.5 3h13a2.5 2.5 0 002.5-3"/><circle cx="9" cy="14" r="1" fill="currentColor" stroke="none"/><path d="M14 12h3"/></svg>
+          Billions Flight</a>
         <a class="<?= adminActive('/admin/membership-levels', $path) ?>" href="/admin/membership-levels">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="9" r="5"/><path d="M9 13.5L7 21l5-3 5 3-2-7.5"/></svg>
           Membership</a>

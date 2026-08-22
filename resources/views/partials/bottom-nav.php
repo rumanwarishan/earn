@@ -21,6 +21,10 @@
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2.5" y="5" width="19" height="13" rx="2.5"/><path d="M10 9.5l4.5 2.5-4.5 2.5v-5z" fill="currentColor" stroke="none"/></svg>
       Earn
     </a>
+    <a class="nav-item <?= navActive('/game', $current) ?>" href="/game">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 15l3-8a3 3 0 013-2h6a3 3 0 013 2l3 8"/><path d="M3 15a2.5 2.5 0 002.5 3h13a2.5 2.5 0 002.5-3"/><circle cx="9" cy="14" r="1" fill="currentColor" stroke="none"/><path d="M14 12h3"/></svg>
+      Game
+    </a>
     <a class="nav-item <?= navActive('/profile', $current) ?>" href="/profile">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.5 4-7 8-7s8 2.5 8 7"/></svg>
       Profile
