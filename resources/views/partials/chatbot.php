@@ -8,7 +8,7 @@
 <div class="chat-window glass-card glow-border" id="chatWindow">
   <div class="chat-header">
     <div class="flex items-center gap-2">
-      <img class="brand-mark sm" src="<?= asset('img/logo-mark.svg') ?>" alt="">
+      <img class="brand-mark sm" src="<?= asset('img/logo-mark.png') ?>" alt="">
       <div>
         <div style="font-weight:700;font-size:13.5px;">Billie</div>
         <div style="font-size:11px;color:var(--text-lo);">Billions Earn Assistant</div>

@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Admin Login · Billions Earn</title>
   <meta name="robots" content="noindex">
-  <link rel="icon" type="image/svg+xml" href="<?= public_asset('favicon.svg') ?>">
+  <link rel="icon" type="image/png" href="<?= public_asset('favicon.png') ?>">
   <link rel="stylesheet" href="<?= asset('css/app.css') ?>">
 </head>
 <body class="auth-body" style="display:flex;align-items:center;justify-content:center;min-height:100vh;padding-bottom:0;">
@@ -14,7 +14,7 @@
   <div class="auth-glow auth-glow-a"></div>
   <div class="auth-glow auth-glow-b"></div>
   <div class="container" style="max-width:380px;position:relative;">
-    <div class="text-center mb-3 flex items-center gap-2" style="justify-content:center;font-weight:700;font-size:19px;"><img class="brand-mark" src="<?= asset('img/logo-mark.svg') ?>" alt=""> Earn Admin</div>
+    <div class="text-center mb-3 flex items-center gap-2" style="justify-content:center;font-weight:700;font-size:19px;"><img class="brand-mark" src="<?= asset('img/logo-mark.png') ?>" alt=""> Earn Admin</div>
     <div class="glass-card auth-card glow-border" style="padding:28px 24px;">
       <?= view('partials.flash') ?>
       <h2 class="mb-3">Admin sign in</h2>

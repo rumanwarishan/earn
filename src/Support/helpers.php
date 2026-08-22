@@ -43,7 +43,7 @@ if (!function_exists('asset')) {
 
 if (!function_exists('public_asset')) {
     // Same cache-busting as asset(), but for any file directly under public/
-    // (favicon.svg, robots.txt, etc.) rather than specifically public/assets/.
+    // (favicon.png, robots.txt, etc.) rather than specifically public/assets/.
     function public_asset(string $path): string
     {
         $path = ltrim($path, '/');

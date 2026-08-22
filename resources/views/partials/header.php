@@ -1,7 +1,7 @@
 <?php $unread = isset($unreadCount) ? (int) $unreadCount : 0; $__path = $_SERVER['REQUEST_URI'] ?? ''; function __navActive(string $p, string $cur): string { return str_starts_with($cur, $p) ? 'active' : ''; } ?>
 <header class="app-header">
   <div class="app-header-inner">
-    <a class="brand" href="/dashboard"><img class="brand-mark" src="<?= asset('img/logo-mark.svg') ?>" alt=""><?= e((string) setting('site_name', 'Billions Earn')) ?></a>
+    <a class="brand" href="/dashboard"><img class="brand-mark" src="<?= asset('img/logo-mark.png') ?>" alt=""><?= e((string) setting('site_name', 'Billions Earn')) ?></a>
     <nav class="desktop-nav">
       <a class="<?= __navActive('/dashboard', $__path) ?>" href="/dashboard">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>Home</a>
